@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLanguage } from '../../i18n/LanguageContext';
 import { Compass, PlusCircle, Sparkles, ShieldAlert, ArrowRight, MapPin } from 'lucide-react';
 import { triggerHaptic } from '../../utils/haptics';
 import { soundEngine } from '../../services/soundEngine';
@@ -25,6 +26,7 @@ export const HeroSection: React.FC<Props> = ({
   onVanishingClick,
   onCityClick,
 }) => {
+  const { t } = useLanguage();
   return (
     <section className="relative w-full min-h-[92vh] flex flex-col items-center justify-center text-center px-4 sm:px-6 lg:px-8 pt-24 pb-16 overflow-hidden bg-[#0e1017]">
       {/* Background Decorative Mandala Rings & Radial Glow */}
@@ -40,17 +42,17 @@ export const HeroSection: React.FC<Props> = ({
         {/* Top Tagline Pill */}
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#d4af37]/15 border border-[#d4af37]/30 text-amber-300 text-xs font-semibold uppercase tracking-wider mb-6 shadow-lg shadow-[#d4af37]/10">
           <Sparkles className="w-3.5 h-3.5 text-[#d4af37]" />
-          <span>India's Living Cultural Preservation</span>
+          <span>{t('hero.tagline')}</span>
         </div>
 
         {/* Headline */}
         <h1 className="text-4xl sm:text-6xl md:text-7xl font-cinzel font-black tracking-tight text-white mb-6 leading-tight">
-          Explore Your <span className="heritage-gold-text">Culture</span>
+          {t('hero.title1')} <span className="heritage-gold-text">{t('hero.title2')}</span>
         </h1>
 
         {/* Supporting text */}
         <p className="max-w-3xl text-base sm:text-xl text-amber-100/90 font-outfit leading-relaxed mb-10">
-          Discover traditional foods, sacred monuments, classical dances, authentic attire, local stories, and endangered heritage across India.
+          {t('hero.subtitle')}
         </p>
 
         {/* CTAs */}
@@ -64,7 +66,7 @@ export const HeroSection: React.FC<Props> = ({
             className="group flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-[#c85a32] via-[#d4af37] to-[#e06d43] hover:from-amber-400 hover:to-orange-400 text-black font-cinzel font-black text-base shadow-2xl shadow-[#d4af37]/30 transition-all transform hover:scale-105 active:scale-95 cursor-pointer"
           >
             <Compass className="w-5 h-5 group-hover:rotate-45 transition-transform" />
-            <span>Explore Cultural Cities</span>
+            <span>{t('hero.explore')}</span>
             <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
           </button>
 
@@ -77,7 +79,7 @@ export const HeroSection: React.FC<Props> = ({
             className="flex items-center gap-2 px-7 py-4 rounded-2xl bg-rose-950/70 hover:bg-rose-900/80 text-rose-300 border border-rose-500/40 font-cinzel font-bold text-base transition-all transform hover:scale-105 active:scale-95 cursor-pointer shadow-lg"
           >
             <ShieldAlert className="w-5 h-5 text-rose-400" />
-            <span>Vanishing Culture</span>
+            <span>{t('hero.vanishing')}</span>
           </button>
 
           <button
@@ -89,7 +91,7 @@ export const HeroSection: React.FC<Props> = ({
             className="flex items-center gap-2.5 px-7 py-4 rounded-2xl glass-heritage hover:border-[#d4af37]/60 text-white font-cinzel font-bold text-base transition-all transform hover:scale-105 active:scale-95 cursor-pointer shadow-lg"
           >
             <PlusCircle className="w-5 h-5 text-[#c85a32]" />
-            <span>Preserve a Story</span>
+            <span>{t('hero.preserve')}</span>
           </button>
         </div>
 
@@ -98,10 +100,10 @@ export const HeroSection: React.FC<Props> = ({
           <div className="flex items-center justify-between mb-5 border-b border-[#d4af37]/20 pb-3">
             <span className="text-xs font-bold text-amber-300 uppercase tracking-widest flex items-center gap-1.5">
               <MapPin className="w-4 h-4 text-[#d4af37]" />
-              <span>Direct City Cultural Portals</span>
+              <span>{t('hero.portals')}</span>
             </span>
             <span className="text-[11px] font-semibold text-gray-400">
-              Select a city to unveil food, dance, dresses & stories
+              {t('hero.portalsDesc')}
             </span>
           </div>
 

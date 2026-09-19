@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useLanguage } from '../../i18n/LanguageContext';
 import {
   Sparkles,
   Search,
@@ -44,6 +45,7 @@ export const Navbar: React.FC<Props> = ({
   selectedLang,
   onLangChange,
 }) => {
+  const { t } = useLanguage();
   const [profile, setProfile] = useState<UserProfile>(getUserProfile());
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
@@ -94,7 +96,7 @@ export const Navbar: React.FC<Props> = ({
               activePage === 'home' ? 'text-[#d4af37] font-bold border-b-2 border-[#d4af37] pb-1' : ''
             }`}
           >
-            Home
+            {t('nav.home')}
           </button>
           <button
             onClick={() => handleNavClick('discover')}
@@ -102,7 +104,7 @@ export const Navbar: React.FC<Props> = ({
               activePage === 'discover' ? 'text-[#d4af37] font-bold border-b-2 border-[#d4af37] pb-1' : ''
             }`}
           >
-            Discover
+            {t('nav.discover')}
           </button>
           <button
             onClick={() => handleNavClick('cities')}
@@ -111,7 +113,7 @@ export const Navbar: React.FC<Props> = ({
             }`}
           >
             <Compass className="w-3.5 h-3.5 text-[#d4af37]" />
-            <span>Cities & Culture</span>
+            <span>{t('nav.cities')}</span>
           </button>
           <button
             onClick={() => handleNavClick('vanishing')}
@@ -120,7 +122,7 @@ export const Navbar: React.FC<Props> = ({
             }`}
           >
             <ShieldAlert className="w-3.5 h-3.5 text-[#c85a32]" />
-            <span>Vanishing Culture</span>
+            <span>{t('nav.vanishing')}</span>
           </button>
           <button
             onClick={() => handleNavClick('adopt')}
@@ -129,7 +131,7 @@ export const Navbar: React.FC<Props> = ({
             }`}
           >
             <HeartHandshake className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Adopt a Heritage</span>
+            <span>{t('nav.adopt')}</span>
           </button>
           <button
             onClick={() => handleNavClick('stories')}
@@ -137,7 +139,7 @@ export const Navbar: React.FC<Props> = ({
               activePage === 'stories' ? 'text-[#d4af37] font-bold border-b-2 border-[#d4af37] pb-1' : ''
             }`}
           >
-            Stories
+            {t('nav.stories')}
           </button>
           <button
             onClick={() => handleNavClick('community')}
@@ -145,7 +147,7 @@ export const Navbar: React.FC<Props> = ({
               activePage === 'community' ? 'text-[#d4af37] font-bold border-b-2 border-[#d4af37] pb-1' : ''
             }`}
           >
-            Community
+            {t('nav.community')}
           </button>
         </nav>
 

@@ -11,6 +11,15 @@
     font-family: var(--font-outfit), sans-serif;
     background-color: #0e1017;
     color: #f8f6f0;
+    top: 0px !important; /* Prevent Google Translate from shifting the body down */
+  }
+
+  /* Hide Google Translate Default Widget */
+  .goog-te-banner-frame.skiptranslate,
+  .goog-te-gadget-icon,
+  .goog-te-gadget-simple,
+  #google_translate_element {
+    display: none !important;
   }
 
   ::-webkit-scrollbar {

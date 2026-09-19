@@ -6,6 +6,7 @@ import { INDIA_MAP_DATA } from '../../data/indiaMapSvgData';
 import { getCityById } from '../../data/cityData';
 import type { MapPinLocation } from '../../types/heritageAlive';
 import { triggerHaptic } from '../../utils/haptics';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 interface Props {
   onCitySelect?: (cityId: string) => void;
@@ -14,6 +15,7 @@ interface Props {
 export const HeritageMap: React.FC<Props> = ({ onCitySelect }) => {
   const [selectedPin, setSelectedPin] = useState<MapPinLocation | null>(MAP_LOCATIONS[0]);
   const activeCityData = selectedPin ? getCityById(selectedPin.id) : null;
+  const { t, language } = useLanguage();
 
   return (
     <div className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto min-h-screen">
@@ -21,13 +23,13 @@ export const HeritageMap: React.FC<Props> = ({ onCitySelect }) => {
       <div className="text-center max-w-3xl mx-auto mb-10">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-sm font-medium mb-4">
           <Compass className="w-4 h-4" />
-          <span>Geo-Spatial Heritage Atlas</span>
+          <span>{t('map.badge')}</span>
         </div>
         <h1 className="text-4xl sm:text-5xl font-extrabold text-stone-100 tracking-tight mb-4">
-          Explore Culture <span className="heritage-gold-text">Around You</span>
+          {t('map.title1')} <span className="heritage-gold-text">{t('map.title2')}</span>
         </h1>
         <p className="text-lg text-stone-400">
-          “Tap on cultural capitals across India to unveil sacred monuments, endangered folk art guilds, and regional culinary traditions.”
+          “{t('map.subtitle')}”
         </p>
       </div>
 
@@ -37,10 +39,10 @@ export const HeritageMap: React.FC<Props> = ({ onCitySelect }) => {
         <div className="lg:col-span-7 glass-heritage p-6 rounded-3xl border border-amber-500/20 relative min-h-[540px] shadow-2xl flex flex-col justify-between overflow-hidden">
           <div className="flex items-center justify-between text-xs text-stone-400 mb-2 z-10">
             <span className="flex items-center gap-1 font-bold text-amber-400 uppercase tracking-widest">
-              <Navigation className="w-3.5 h-3.5" /> Interactive Map of India
+              <Navigation className="w-3.5 h-3.5" /> {t('map.interactive')}
             </span>
             <span className="bg-stone-900 px-3 py-1 rounded-full border border-stone-800 text-amber-300 font-semibold">
-              6 Active Cultural Hubs
+              {t('map.activeHubs')}
             </span>
           </div>
 
@@ -164,7 +166,7 @@ export const HeritageMap: React.FC<Props> = ({ onCitySelect }) => {
                         fontWeight="bold"
                         className={isSelected ? 'fill-stone-950 font-cinzel font-black' : 'fill-amber-200 font-cinzel'}
                       >
-                        {pin.name}
+                        {language === 'hi' && pin.hindiName ? pin.hindiName : pin.name}
                       </text>
                     </g>
                   </g>
@@ -194,7 +196,7 @@ export const HeritageMap: React.FC<Props> = ({ onCitySelect }) => {
                   <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">
                     {selectedPin.category}
                   </span>
-                  <h2 className="text-3xl font-extrabold text-stone-100 mt-2">{selectedPin.name}</h2>
+                  <h2 className="text-3xl font-extrabold text-stone-100 mt-2">{language === 'hi' && activeCityData?.hindiName ? activeCityData.hindiName : selectedPin.name}</h2>
                   <p className="text-amber-400/90 text-sm font-semibold">{selectedPin.state}</p>
                 </div>
 
@@ -242,7 +244,7 @@ export const HeritageMap: React.FC<Props> = ({ onCitySelect }) => {
                       onClick={() => onCitySelect(selectedPin.id)}
                       className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#c85a32] via-[#d4af37] to-[#e06d43] hover:from-amber-400 hover:to-orange-400 text-stone-950 font-black text-sm transition-all shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 cursor-pointer group"
                     >
-                      <span>Explore Culture: Food, Dance & Stories</span>
+                      <span>{t('map.explore')}</span>
                       <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </button>
                   )}
@@ -253,7 +255,7 @@ export const HeritageMap: React.FC<Props> = ({ onCitySelect }) => {
                     }}
                     className="w-full py-2.5 rounded-xl glass-heritage border border-amber-500/30 hover:border-amber-400 text-amber-300 font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
                   >
-                    <span>Preserve Story from {selectedPin.name}</span>
+                    <span>{t('map.preserve')} {language === 'hi' && activeCityData?.hindiName ? activeCityData.hindiName : selectedPin.name}</span>
                   </button>
                 </div>
               </motion.div>

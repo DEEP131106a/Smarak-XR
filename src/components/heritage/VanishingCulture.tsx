@@ -4,12 +4,14 @@ import { AlertTriangle, Flame, ShieldAlert, Volume2, Users, MapPin, Tag, X, Play
 import { HERITAGE_ITEMS } from '../../data/heritageAliveData';
 import type { HeritageItem, CultureStatus } from '../../types/heritageAlive';
 import { toggleAdoptHeritage, getUserProfile } from '../../services/heritageStateService';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 export const VanishingCulture: React.FC = () => {
   const [selectedStatus, setSelectedStatus] = useState<string>('All');
   const [activeModalItem, setActiveModalItem] = useState<HeritageItem | null>(null);
   const [isPlayingAudio, setIsPlayingAudio] = useState<boolean>(false);
   const [profile, setProfile] = useState(getUserProfile());
+  const { t } = useLanguage();
 
   const statusFilters = ['All', 'Critical', 'At Risk', 'Declining', 'Thriving'];
 
@@ -61,13 +63,13 @@ export const VanishingCulture: React.FC = () => {
       <div className="text-center max-w-3xl mx-auto mb-12">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 text-sm font-medium mb-4">
           <AlertTriangle className="w-4 h-4 animate-pulse" />
-          <span>Endangered Heritage Registry</span>
+          <span>{t('vanishing.badge')}</span>
         </div>
         <h1 className="text-4xl sm:text-5xl font-extrabold text-stone-100 tracking-tight mb-4">
-          Vanishing <span className="heritage-gold-text">Culture</span>
+          {t('vanishing.title1')} <span className="heritage-gold-text">{t('vanishing.title2')}</span>
         </h1>
         <p className="text-lg text-stone-400">
-          “Some traditions disappear quietly. We want to document them before they do.”
+          “{t('vanishing.subtitle')}”
         </p>
       </div>
 

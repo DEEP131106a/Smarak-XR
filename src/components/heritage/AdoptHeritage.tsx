@@ -4,10 +4,12 @@ import { BookmarkCheck, Clock, ShieldCheck, CheckSquare, Square, Zap, Award, Spa
 import { ADOPT_ITEMS } from '../../data/heritageAliveData';
 import type { AdoptItem } from '../../types/heritageAlive';
 import { toggleAdoptHeritage, getUserProfile, subscribeState, addPoints } from '../../services/heritageStateService';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 export const AdoptHeritage: React.FC = () => {
   const [profile, setProfile] = useState(getUserProfile());
   const [taskStates, setTaskStates] = useState<Record<string, boolean>>({});
+  const { t } = useLanguage();
 
   useEffect(() => {
     const unsub = subscribeState(() => {
@@ -36,13 +38,13 @@ export const AdoptHeritage: React.FC = () => {
       <div className="text-center max-w-3xl mx-auto mb-12">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm font-medium mb-4">
           <Zap className="w-4 h-4" />
-          <span>Gamified Micro-Preservation</span>
+          <span>{t('adopt.badge')}</span>
         </div>
         <h1 className="text-4xl sm:text-5xl font-extrabold text-stone-100 tracking-tight mb-4">
-          Adopt a <span className="heritage-gold-text">Heritage</span>
+          {t('adopt.title1')} <span className="heritage-gold-text">{t('adopt.title2')}</span>
         </h1>
         <p className="text-lg text-stone-400">
-          “Don't just learn culture. Help keep it alive by taking ownership of an endangered tradition.”
+          “{t('adopt.subtitle')}”
         </p>
       </div>
 

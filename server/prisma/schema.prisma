@@ -1,0 +1,315 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Monument {
+  id                 String   @id
+  name               String
+  hindiName          String
+  location           String
+  state              String
+  region             String
+  period             String
+  dynasty            String
+  unesco             Boolean
+  builtYear          Int
+  tagline            String
+  shortDescription   String
+  fullHistory        String
+  architecturalStyle String
+  modelType          String
+  accentColor        String
+  lat                Float
+  lng                Float
+  status             String   @default("APPROVED")
+
+  // Relations
+  creatures          MonumentCreature[]
+  hotspots           ArchitecturalHotspot[]
+  timeline           HistoricalEra[]
+
+  // Embedded structures (simplified for SQLite which doesn't support JSON out of the box in Prisma without workarounds, but we can use JSON strings or separate tables)
+  audioGuideTitleEn       String
+  audioGuideTranscriptEn  String
+  audioGuideTranscriptHi  String
+  audioGuideDuration      Int
+
+  vrPanoTitle           String
+  vrPanoAerialDesc      String
+  vrPanoSanctumDesc     String
+  vrPanoCourtyardDesc   String
+  vrPanoAerialImage     String
+  vrPanoSanctumImage    String
+  vrPanoCourtyardImage  String
+
+  visitTipsBestTime     String
+  visitTipsAartiHours   String
+  visitTipsPhotography  String
+  visitTipsDressCode    String
+}
+
+model Creature {
+  id              String   @id
+  name            String
+  sanskritName    String
+  title           String
+  associatedDeity String
+  symbolism       String
+  anatomy         String
+  mythology       String
+  carvingLocation String
+  colorHex        String
+  badgeTitle      String
+
+  monuments       MonumentCreature[]
+}
+
+model MonumentCreature {
+  monumentId String
+  creatureId String
+  monument   Monument @relation(fields: [monumentId], references: [id])
+  creature   Creature @relation(fields: [creatureId], references: [id])
+
+  @@id([monumentId, creatureId])
+}
+
+model HistoricalEra {
+  id                     Int      @id @default(autoincrement())
+  year                   String
+  eraName                String
+  description            String
+  reconstructedCondition String
+  ruler                  String
+  monumentId             String
+  monument               Monument @relation(fields: [monumentId], references: [id])
+}
+
+model ArchitecturalHotspot {
+  id          String   @id
+  title       String
+  description String
+  posX        Float
+  posY        Float
+  posZ        Float
+  category    String
+  fact        String
+  monumentId  String
+  monument    Monument @relation(fields: [monumentId], references: [id])
+}
+
+// -----------------------------------------------------------------------------
+// Explore (State & City) Models
+// -----------------------------------------------------------------------------
+
+model State {
+  id              String   @id
+  name            String
+  hindiName       String?
+  tagline         String
+  description     String
+  region          String
+  capital         String
+  heroPlaceholder String?
+  overview        String
+
+  // JSON stringified fields
+  cultureOverview String   // JSON string of {foodSummary, danceSummary, ...}
+  featuredCities  String   // JSON string array of city IDs
+
+  cities          City[]
+  historyTimeline TimelineEvent[] @relation("StateTimeline")
+}
+
+model City {
+  id              String   @id
+  stateId         String
+  state           State    @relation(fields: [stateId], references: [id])
+  stateName       String
+  name            String
+  hindiName       String?
+  tagline         String
+  description     String
+  heroPlaceholder String?
+  heroImage       String?
+  videoCount      Int
+  arEnabled       Boolean  @default(false)
+
+  // JSON stringified fields
+  galleryImages   String   // JSON string of {id, title, caption, imageUrl}[]
+
+  historyTimeline TimelineEvent[] @relation("CityTimeline")
+  placesToVisit   PlaceToVisit[]
+  culturalEntries CulturalEntry[]
+}
+
+model TimelineEvent {
+  id           String   @id
+  period       String
+  title        String
+  description  String
+  significance String?
+
+  cityId       String?
+  city         City?    @relation("CityTimeline", fields: [cityId], references: [id])
+  
+  stateId      String?
+  state        State?   @relation("StateTimeline", fields: [stateId], references: [id])
+}
+
+model PlaceToVisit {
+  id               String   @id
+  name             String
+  category         String
+  shortDescription String
+  fullDescription  String?
+  location         String?
+  imagePlaceholder String?
+  imageUrl         String?
+  arAvailable      Boolean  @default(false)
+  status           String   @default("APPROVED")
+
+  cityId           String
+  city             City     @relation(fields: [cityId], references: [id])
+}
+
+model CulturalEntry {
+  id                   String   @id
+  categoryType         String   // e.g. 'food', 'dance', 'music' (for CityCultureData key)
+  title                String
+  subtitle             String?
+  description          String
+  history              String?
+  mediaStatus          String
+
+  // JSON stringified fields
+  traditions           String?  // JSON string array
+  ingredients          String?  // JSON string array
+  materials            String?  // JSON string array
+  occasions            String?  // JSON string array
+
+  costumeDetails       String?
+  imagePlaceholder     String?
+  imageUrl             String?
+  videoPlaceholderText String?
+  audioPlaceholderText String?
+
+  cityId               String
+  city                 City     @relation(fields: [cityId], references: [id])
+}
+
+// -----------------------------------------------------------------------------
+// Culture Models (CultureItem, CultureRegion)
+// -----------------------------------------------------------------------------
+
+model CultureRegion {
+  id                 String   @id
+  name               String
+  hindiName          String?
+  description        String?
+  thumbnail          String?
+
+  // JSON stringified fields
+  featuredCategories String?  // JSON string array
+}
+
+model CultureItem {
+  id                   String   @id
+  title                String
+  category             String
+  region               String
+  description          String
+  thumbnail            String?
+  model3d              String?
+  arEnabled            Boolean  @default(false)
+  history              String?
+  origin               String?
+  language             String?
+  featured             Boolean  @default(false)
+  
+  // Specific category metadata fields (optional)
+  preparation          String?
+  culturalStory        String?
+  craftsmanship        String?
+  artisanStory         String?
+  costumeDetails       String?
+  culturalSignificance String?
+
+  // JSON stringified fields
+  images               String?  // JSON string array
+  videos               String?  // JSON string array
+  audio                String?  // JSON string array
+  traditions           String?  // JSON string array
+  tags                 String?  // JSON string array
+  ingredients          String?  // JSON string array
+  materials            String?  // JSON string array
+  instrumentsUsed      String?  // JSON string array
+  occasions            String?  // JSON string array
+  patterns             String?  // JSON string array
+}
+
+// -----------------------------------------------------------------------------
+// Heritage Alive Models (HeritageItem, AdoptItem, StoryItem)
+// -----------------------------------------------------------------------------
+
+model HeritageItem {
+  id                   String   @id
+  title                String
+  subtitle             String?
+  category             String
+  region               String
+  state                String
+  status               String
+  description          String
+  origin               String?
+  significance         String?
+  history              String?
+  image                String?
+  audioPlaceholderText String?
+  videoPlaceholderText String?
+  artisanCount         Int?
+  featured             Boolean  @default(false)
+
+  // JSON stringified fields
+  tags                 String?  // JSON string array
+}
+
+model AdoptItem {
+  id                 String   @id
+  title              String
+  category           String
+  region             String
+  state              String
+  difficulty         String
+  timeRequired       String
+  preservationImpact String
+  description        String
+  adopted            Boolean  @default(false)
+
+  // JSON stringified fields
+  tasks              String   // JSON string of TaskItem[]
+}
+
+model StoryItem {
+  id                String   @id
+  title             String
+  category          String
+  region            String
+  state             String
+  preservedBy       String
+  date              String
+  shortStory        String
+  fullStory         String?
+  mediaType         String
+  status            String
+  image             String?
+  audioUrl          String?
+  videoUrl          String?
+
+  // JSON stringified fields
+  recipeIngredients String?  // JSON string array
+}

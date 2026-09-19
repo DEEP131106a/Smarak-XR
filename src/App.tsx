@@ -23,10 +23,12 @@ import { CameraARViewer } from './components/CameraARViewer';
 import { MONUMENTS } from './data/monuments';
 import type { Monument } from './types';
 
+import { useLanguage } from './i18n/LanguageContext';
+
 export function App() {
   const [activePage, setActivePage] = useState<string>('home');
   const [activeCityId, setActiveCityId] = useState<string>('amritsar');
-  const [selectedLang, setSelectedLang] = useState<string>('en');
+  const { language: selectedLang, setLanguage: setSelectedLang } = useLanguage();
   const [activeArMonument, setActiveArMonument] = useState<Monument | null>(null);
   const [arViewerMode, setArViewerMode] = useState<'webxr' | 'camera'>('webxr');
 
@@ -62,6 +64,28 @@ export function App() {
     const evt = new CustomEvent('open-preserve-modal');
     window.dispatchEvent(evt);
   };
+
+  // Re-trigger Google Translate when page changes (fixes SPA translation issue)
+  useEffect(() => {
+    if (selectedLang === 'en') return;
+    
+    // Wait for page transition to complete
+    const timer = setTimeout(() => {
+      const select = document.querySelector('.goog-te-combo') as HTMLSelectElement;
+      if (select) {
+        // Force refresh translation by toggling
+        select.value = 'en';
+        select.dispatchEvent(new Event('change'));
+        
+        setTimeout(() => {
+          select.value = selectedLang;
+          select.dispatchEvent(new Event('change'));
+        }, 50);
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [activePage, activeCityId, selectedLang]);
 
   return (
     <div className="min-h-screen bg-[#0e1017] text-stone-100 selection:bg-amber-500 selection:text-stone-950 font-outfit relative pb-20 md:pb-0 overflow-x-hidden">
