@@ -86,7 +86,7 @@ export type StoryItem = {
   shortStory: string;
   fullStory?: string;
   mediaType: 'audio' | 'video' | 'photo' | 'written' | 'recipe';
-  status: string;
+  status: 'pending' | 'verified' | 'rejected' | string;
   image?: string;
   audioUrl?: string;
   videoUrl?: string;
@@ -154,4 +154,5 @@ export type MapPinLocation = {
   category: string;
   hindiName?: string;
 };
+
 

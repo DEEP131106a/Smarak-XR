@@ -60,7 +60,7 @@ export const PreserveStoryModal: React.FC = () => {
       shortStory: storyText.slice(0, 150) + (storyText.length > 150 ? '...' : ''),
       fullStory: storyText,
       mediaType,
-      status: 'Digitally Preserved ✓',
+      status: 'pending',
       image:
         mediaType === 'recipe'
           ? 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=800&q=80'
@@ -331,9 +331,9 @@ export const PreserveStoryModal: React.FC = () => {
                 <CheckCircle2 className="w-8 h-8" />
               </div>
 
-              <h2 className="text-2xl font-extrabold text-white">Story Successfully Preserved!</h2>
+              <h2 className="text-2xl font-extrabold text-white">Story Submitted for Verification!</h2>
               <p className="text-stone-300 text-sm max-w-md mx-auto">
-                You earned <span className="text-amber-400 font-bold">+50 Heritage Points</span>. Here is your generated Digital Heritage Card:
+                Your story is now pending review by our Curators. Once verified, you will earn <span className="text-amber-400 font-bold">+50 Heritage Points</span> and it will be added to the archives!
               </p>
 
               {/* Digital Heritage Card */}
@@ -379,3 +379,7 @@ export const PreserveStoryModal: React.FC = () => {
     </AnimatePresence>
   );
 };
+
+
+
+

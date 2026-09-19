@@ -207,6 +207,18 @@ export const Navbar: React.FC<Props> = ({
             )}
           </div>
 
+          {/* Admin Dashboard Button */}
+          {profile.isAdmin && (
+            <button
+              onClick={() => handleNavClick('admin-dashboard')}
+              title="Moderation Queue"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/20 border border-amber-500/50 text-amber-400 hover:bg-amber-500 hover:text-stone-900 font-bold text-xs transition-all cursor-pointer"
+            >
+              <ShieldAlert className="w-3.5 h-3.5" />
+              <span>Queue</span>
+            </button>
+          )}
+
           {/* User Sign In / Profile Action Buttons */}
           {profile.isLoggedIn ? (
             <div className="flex items-center gap-1.5">
@@ -365,3 +377,6 @@ export const Navbar: React.FC<Props> = ({
     </header>
   );
 };
+
+
+

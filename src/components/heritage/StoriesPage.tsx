@@ -19,6 +19,7 @@ export const StoriesPage: React.FC = () => {
   const filters = ['All', 'Craft', 'Food', 'Music', 'Tradition', 'Oral History'];
 
   const filteredStories = stories.filter((s) => {
+    if (s.status === 'pending' || s.status === 'rejected') return false;
     if (selectedFilter === 'All') return true;
     return s.category === selectedFilter;
   });
@@ -170,3 +171,4 @@ export const StoriesPage: React.FC = () => {
     </div>
   );
 };
+

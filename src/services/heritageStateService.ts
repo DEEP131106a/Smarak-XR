@@ -197,3 +197,23 @@ export function addUserStory(story: StoryItem): void {
   saveUserProfile(updatedProfile);
   addPoints(50, 'Preserved a Story');
 }
+export function updateUserStoryStatus(storyId: string, status: 'verified' | 'rejected'): void {
+  let existing: StoryItem[] = [];
+  try {
+    const saved = localStorage.getItem(STORAGE_STORIES_KEY);
+    if (saved) existing = JSON.parse(saved);
+  } catch {
+    return;
+  }
+  
+  const updatedList = existing.map(story => 
+    story.id === storyId ? { ...story, status } : story
+  );
+  
+  try {
+    localStorage.setItem(STORAGE_STORIES_KEY, JSON.stringify(updatedList));
+  } catch {
+    // ignore
+  }
+  notify();
+}

@@ -18,6 +18,7 @@ import { UserProfileDashboard } from './components/heritage/UserProfileDashboard
 import { GlobalSearchModal } from './components/heritage/GlobalSearchModal';
 import { Footer } from './components/heritage/Footer';
 import { LoginPage } from './components/heritage/LoginPage';
+import { AdminDashboard } from './components/heritage/AdminDashboard';
 import { ModelViewerWebXR } from './components/ModelViewerWebXR';
 import { CameraARViewer } from './components/CameraARViewer';
 import { MONUMENTS } from './data/monuments';
@@ -156,6 +157,7 @@ export function App() {
             {activePage === 'stories' && <StoriesPage />}
             {activePage === 'community' && <CommunityPage />}
             {activePage === 'profile' && <UserProfileDashboard />}
+            {activePage === 'admin-dashboard' && <AdminDashboard />}
             {activePage === 'login' && (
               <LoginPage
                 onLoginSuccess={() => handleNavigate('home')}
@@ -196,5 +198,6 @@ export function App() {
 }
 
 export default App;
+
 
 
