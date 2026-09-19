@@ -2,10 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mic, Video, Camera, FileText, Utensils, X, Sparkles, CheckCircle2, Award } from 'lucide-react';
 import type { StoryItem, CategoryType } from '../../types/heritageAlive';
-import { addUserStory } from '../../services/heritageStateService';
+import { addUserStory, getUserProfile, subscribeState } from '../../services/heritageStateService';
 
 export const PreserveStoryModal: React.FC = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [profile, setProfile] = useState(getUserProfile());
+
+  useEffect(() => {
+    return subscribeState(() => setProfile(getUserProfile()));
+  }, []);
   const [mediaType, setMediaType] = useState<'audio' | 'video' | 'photo' | 'written' | 'recipe'>('written');
   
   // Form fields
@@ -55,7 +60,8 @@ export const PreserveStoryModal: React.FC = () => {
       category,
       region: region || 'Local Region',
       state: stateName,
-      preservedBy: preservedBy || 'Anonymous Contributor',
+      preservedBy: preservedBy || profile?.name || 'Anonymous Contributor',
+        authorId: profile?.name || 'guest',
       date: 'Just Now',
       shortStory: storyText.slice(0, 150) + (storyText.length > 150 ? '...' : ''),
       fullStory: storyText,
@@ -379,6 +385,8 @@ export const PreserveStoryModal: React.FC = () => {
     </AnimatePresence>
   );
 };
+
+
 
 
 
