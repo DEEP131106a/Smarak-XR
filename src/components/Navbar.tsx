@@ -83,9 +83,6 @@ export const Navbar: React.FC<Props> = ({
               <span className="font-cinzel font-black text-white text-base sm:text-lg tracking-wider">
                 SMARAK
               </span>
-              <span className="text-[10px] font-black px-1.5 py-0.5 rounded bg-gradient-to-r from-amber-400 to-orange-500 text-black">
-                AR
-              </span>
             </div>
             <p className="font-yatra text-[11px] text-amber-400 -mt-1 hidden sm:block">
               स्मारक एआर • भारतीय धरोहर
@@ -95,14 +92,7 @@ export const Navbar: React.FC<Props> = ({
 
         {/* Desktop Nav Links */}
         <nav className="hidden lg:flex items-center gap-6 text-xs font-semibold text-gray-200">
-          <button
-            onClick={() => scrollTo('viewer')}
-            className={`hover:text-amber-400 transition-colors cursor-pointer ${
-              activeSection === 'monuments' ? 'text-amber-400 font-bold' : ''
-            }`}
-          >
-            3D Sanctum
-          </button>
+          {/* Removed 3D Sanctum */}
 
           {/* New Explore India Navigation Link */}
           <button
@@ -182,18 +172,7 @@ export const Navbar: React.FC<Props> = ({
             {isAudioPlaying ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
           </button>
 
-          {/* Quick AR Launch */}
-          <button
-            onClick={() => {
-              triggerHaptic('success');
-              soundEngine.playTempleBell(659, 2.0);
-              onOpenAR();
-            }}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-cinzel font-bold text-xs shadow-lg shadow-amber-500/25 transition-all transform hover:scale-105 active:scale-95 cursor-pointer"
-          >
-            <Camera className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Camera AR</span>
-          </button>
+          {/* Removed Quick AR Launch */}
 
           {/* Mobile Menu Toggle */}
           <button
@@ -211,12 +190,7 @@ export const Navbar: React.FC<Props> = ({
       {/* Mobile Dropdown Drawer */}
       {mobileMenuOpen && (
         <div className="lg:hidden mt-2 p-4 rounded-3xl glass-royal border border-amber-500/30 shadow-2xl flex flex-col gap-3 text-sm font-semibold text-gray-200 animate-in fade-in slide-in-from-top-2">
-          <button
-            onClick={() => scrollTo('viewer')}
-            className="text-left py-2 px-3 rounded-xl hover:bg-white/5 hover:text-amber-400"
-          >
-            🏛️ 3D Sanctum Viewer
-          </button>
+          {/* Removed 3D Sanctum Viewer from mobile menu */}
           <button
             onClick={() => scrollTo('explore')}
             className="text-left py-2 px-3 rounded-xl hover:bg-white/5 hover:text-amber-400"

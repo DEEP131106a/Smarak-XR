@@ -245,9 +245,6 @@ export const CityDetailPage: React.FC<Props> = ({ city, onNavigate, onOpenAR }) 
         </div>
       </section>
 
-      {/* 12. 3D / AR Section (Rule 23) */}
-      <ARExperienceCard onOpenAR={onOpenAR} />
-
       {/* Gallery Lightbox Modal */}
       {activeImageModal && (
         <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">

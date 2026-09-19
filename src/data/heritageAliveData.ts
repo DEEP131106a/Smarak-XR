@@ -97,7 +97,7 @@ export const HERITAGE_ITEMS: HeritageItem[] = [
       'The ancient Cire Perdue (lost-wax) technique of casting solid Panchaloha (five-metal alloy) bronze idols of Lord Nataraja and deities.',
     origin: 'Chola Dynasty patronage during 9th to 13th Century CE.',
     tags: ['Metalwork', 'Tamil Nadu', 'Chola', 'Sculpture'],
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Shiva_as_the_Lord_of_Dance_%28Nataraja%29_LACMA_M.69.69.jpg/1280px-Shiva_as_the_Lord_of_Dance_%28Nataraja%29_LACMA_M.69.69.jpg',
+    image: '/images/lost-wax.png',
   },
   {
     id: 'warli-tribal-painting',
@@ -112,7 +112,7 @@ export const HERITAGE_ITEMS: HeritageItem[] = [
     description:
       'Monochrome tribal ritual art using rice paste on red ochre mud walls depicting the Circle of Life, Mother Goddess Palghat, and Tarapa dance.',
     tags: ['Art', 'Maharashtra', 'Tribal', 'Painting'],
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Warli_painting_Maharashtra.jpg/1280px-Warli_painting_Maharashtra.jpg',
+    image: '/images/warli.png',
   },
 ];
 
@@ -475,30 +475,3 @@ export const MAP_LOCATIONS: MapPinLocation[] = [
   },
 ];
 
-// 7. AI Predefined Chat Responses ("Talk to Your Heritage")
-export const AI_PREDEFINED_RESPONSES: Record<string, { answer: string; source: string; related: string[] }> = {
-  phulkari: {
-    answer:
-      'Phulkari (literally "flower work") is Punjab’s sacred folk embroidery technique. Historically, mothers began embroidering a "Bagh" (garden) shawl on coarse cotton (khaddar) the day a baby girl was born, using unspun damask silk thread. Stitches are done strictly from the reverse side without drawing guide lines, relying entirely on geometric mental counting.',
-    source: 'Smarak XR Heritage Archives • Majha Folk Crafts Guild',
-    related: ['Phulkari Embroidery Item', 'Grandmother’s Bagh Story', 'Adopt Phulkari Stitching'],
-  },
-  bhangra: {
-    answer:
-      'Bhangra originated in 14th-century Punjab as an energetic harvest celebration dance performed by farmers during Vaisakhi to thank Mother Earth. The rhythm is driven by the double-headed Dhol drum, Algoza twin flutes, and Tumbi. Today, it has evolved into a global symbol of joy and resilience.',
-    source: 'Punjabi Folk Music & Dance Academy',
-    related: ['Dhol-Tasha Drums', 'Vaisakhi Festival', 'Kumaoni Folk Songs'],
-  },
-  disappearing: {
-    answer:
-      'Currently, 84 major Indian cultural traditions are classified as At Risk or Critical. Key endangered elements include Nilgiri Toda Tribal Language (under 1,000 speakers remaining), Kumaoni Jhora Mountain Ballads, Thanjavur Wooden Pit-Loom Silk Shuttle Weaving, and Traditional Desert Bajra Fermentation Recipes.',
-    source: 'Heritage Alive Vanishing Culture Index (2026)',
-    related: ['Vanishing Culture Page', 'Adopt a Heritage', 'Preserve a Story'],
-  },
-  festivals: {
-    answer:
-      'Unique regional festivals include: 1) Puneri Sarvajanik Ganesh Utsav in Maharashtra with 100-drum Dhol-Tasha ensembles; 2) Onam in Kerala with 100-oar snake boat races; 3) Pushkar Camel Fair in Rajasthan; 4) Durga Puja in Bengal featuring Kumartuli clay idol sculpting.',
-    source: 'Living Traditions of India Cultural Register',
-    related: ['Puneri Ganesh Utsav', 'Kashi Ganga Aarti', 'Pushkar Fair'],
-  },
-};

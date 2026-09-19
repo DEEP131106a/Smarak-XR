@@ -116,18 +116,6 @@ export const PlacesToVisitCard: React.FC<Props> = ({ place, onOpenAR }) => {
             </p>
 
             <div className="flex gap-3">
-              {place.arAvailable && onOpenAR && (
-                <button
-                  onClick={() => {
-                    setShowModal(false);
-                    onOpenAR();
-                  }}
-                  className="flex-1 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-black font-cinzel font-black text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-amber-500/20"
-                >
-                  <Smartphone className="w-4 h-4" />
-                  <span>Launch 3D AR View</span>
-                </button>
-              )}
               <button
                 onClick={() => setShowModal(false)}
                 className="flex-1 py-3 rounded-2xl glass-royal text-white font-cinzel font-bold text-xs sm:text-sm cursor-pointer border border-amber-500/30 hover:border-amber-500/60"

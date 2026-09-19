@@ -141,15 +141,7 @@ export const CityExplorer: React.FC<Props> = ({ cityId, onBack }) => {
                           <h4 className="text-stone-100 font-bold text-sm leading-tight group-hover:text-amber-400 transition-colors">{item.name}</h4>
                           <p className="text-stone-400 text-xs mt-0.5 capitalize">{item.category}</p>
                         </div>
-                        {item.category === 'monument' && (
-                          <button
-                            onClick={e => { e.stopPropagation(); setAr3dItem(item); }}
-                            title="View in 3D AR"
-                            className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-500/90 hover:bg-amber-400 text-black text-[10px] font-extrabold shadow-md shadow-amber-500/30 transition-all z-10"
-                          >
-                            <Box className="w-3 h-3" /> 3D AR
-                          </button>
-                        )}
+                        {/* Removed 3D AR Button */}
                       </div>
                     ))}
                   </div>
@@ -247,16 +239,7 @@ export const CityExplorer: React.FC<Props> = ({ cityId, onBack }) => {
                       <div className="absolute top-3 left-3 flex gap-2">
                         <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${STATUS_BADGE[item.status]}`}>{item.status}</span>
                       </div>
-                      {/* 3D AR button — top-right corner */}
-                      {item.category === 'monument' ? (
-                        <button
-                          onClick={e => { e.stopPropagation(); setAr3dItem(item); }}
-                          title="View in 3D AR"
-                          className="absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black text-[11px] font-extrabold shadow-lg shadow-amber-500/40 transition-all z-10 border border-amber-300/30"
-                        >
-                          <Box className="w-3.5 h-3.5" /> 3D AR
-                        </button>
-                      ) : item.artisanCount ? (
+                      {item.artisanCount ? (
                         <div className="absolute top-3 right-3 flex items-center gap-1 bg-stone-900/80 px-2 py-0.5 rounded text-amber-400 text-[11px] font-semibold">
                           <Users className="w-3 h-3" /> {item.artisanCount.toLocaleString()} left
                         </div>

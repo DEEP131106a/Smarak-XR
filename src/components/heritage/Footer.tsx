@@ -82,12 +82,6 @@ export const Footer: React.FC<Props> = ({ onNavigate }) => {
           </h4>
           <ul className="space-y-2 text-xs">
             <li>
-              <button onClick={() => handleNav('ai-storyteller')} className="hover:text-[#d4af37] transition-colors cursor-pointer flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-[#d4af37]" />
-                <span>Talk to Your Heritage (AI)</span>
-              </button>
-            </li>
-            <li>
               <button onClick={() => handleNav('map')} className="hover:text-[#d4af37] transition-colors cursor-pointer flex items-center gap-1.5">
                 <Compass className="w-3.5 h-3.5 text-amber-400" />
                 <span>Interactive Heritage Map</span>

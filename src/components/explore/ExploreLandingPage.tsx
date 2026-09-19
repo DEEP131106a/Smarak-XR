@@ -134,9 +134,6 @@ export const ExploreLandingPage: React.FC<Props> = ({
             </div>
           </section>
         )}
-
-        {/* 5. AR/3D Experience Integration Card (Rule 23) */}
-        <ARExperienceCard onOpenAR={onOpenAR} />
       </div>
     </div>
   );

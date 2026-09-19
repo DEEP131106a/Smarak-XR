@@ -18,7 +18,6 @@ const CATEGORY_OPTIONS: { id: ExploreFilter['category']; label: string }[] = [
   { id: 'crafts', label: 'Arts & Crafts' },
   { id: 'festivals', label: 'Festivals' },
   { id: 'stories', label: 'Local Stories' },
-  { id: 'ar', label: '3D/AR Ready' },
 ];
 
 export const ExploreFilterBar: React.FC<Props> = ({ filter, states, onChange }) => {

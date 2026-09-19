@@ -22,13 +22,14 @@ export const AdoptHeritage: React.FC = () => {
     toggleAdoptHeritage(item.id);
   };
 
-  const handleToggleTask = (taskId: string) => {
+  const handleToggleTask = (itemId: string, taskId: string) => {
+    const key = `${itemId}-${taskId}`;
     setTaskStates((prev) => {
-      const nextVal = !prev[taskId];
+      const nextVal = !prev[key];
       if (nextVal) {
         addPoints(10, 'Completed Task');
       }
-      return { ...prev, [taskId]: nextVal };
+      return { ...prev, [key]: nextVal };
     });
   };
 
@@ -89,7 +90,7 @@ export const AdoptHeritage: React.FC = () => {
           
           // Calculate task completion count
           const completedTaskCount = item.tasks.reduce((acc, t) => {
-            return acc + (taskStates[t.id] ? 1 : 0);
+            return acc + (taskStates[`${item.id}-${t.id}`] ? 1 : 0);
           }, 0);
 
           return (
@@ -139,11 +140,12 @@ export const AdoptHeritage: React.FC = () => {
                   </div>
 
                   {item.tasks.map((task) => {
-                    const isChecked = !!taskStates[task.id];
+                    const taskKey = `${item.id}-${task.id}`;
+                    const isChecked = !!taskStates[taskKey];
                     return (
                       <div
                         key={task.id}
-                        onClick={() => handleToggleTask(task.id)}
+                        onClick={() => handleToggleTask(item.id, task.id)}
                         className={`p-3 rounded-xl border text-xs cursor-pointer flex items-center justify-between transition-all ${
                           isChecked
                             ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-200'

@@ -34,38 +34,28 @@ export const HeroSection: React.FC<Props> = ({
         {/* Top Tagline Pill */}
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-semibold uppercase tracking-wider mb-4 shadow-lg shadow-amber-500/10">
           <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-spin" />
-          <span>Smarak AR • Mobile-First Augmented & Virtual Reality</span>
+          <span>Smarak • Heritage & Culture</span>
         </div>
 
         {/* Big Smarak AR Title */}
         <h1 className="text-5xl sm:text-7xl md:text-8xl font-cinzel font-black tracking-tight text-white mb-2 leading-none">
-          SMARAK <span className="gold-gradient-text">AR</span>
+          SMARAK
         </h1>
         <h2 className="text-xl sm:text-2xl md:text-3xl font-cinzel font-bold text-amber-200/90 tracking-widest mb-2">
           HERITAGE & CULTURE OF INDIA
         </h2>
         <p className="font-yatra text-lg sm:text-2xl text-amber-400/90 tracking-wide mb-6">
-          स्मारक एआर • भारतीय धरोहर एवं पवित्र प्रतीक
+          स्मारक • भारतीय धरोहर एवं पवित्र प्रतीक
         </p>
 
         {/* Motive & Mission Statement */}
         <p className="max-w-2xl text-sm sm:text-base md:text-lg text-amber-100/80 font-outfit leading-relaxed mb-8">
-          Designed for seamless interaction on your mobile phone and desktop. Step into India’s monumental architectural marvels and the sacred mythic creatures carved upon their stones in AR & VR—whether standing physically before them or journeying from home.
+          Designed for seamless interaction on your mobile phone and desktop. Step into India’s monumental architectural marvels and the sacred mythic creatures carved upon their stones—whether standing physically before them or journeying from home.
         </p>
 
         {/* CTAs */}
         <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mb-10">
-          <button
-            onClick={() => {
-              triggerHaptic('success');
-              soundEngine.playTempleBell(587.33, 2.5);
-              onStartAR();
-            }}
-            className="group flex items-center gap-2.5 px-6 sm:px-8 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-400 text-black font-cinzel font-black text-sm sm:text-base shadow-2xl shadow-amber-500/30 transition-all transform hover:scale-105 active:scale-95 cursor-pointer"
-          >
-            <Camera className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-            <span>Launch Mobile AR</span>
-          </button>
+          {/* Removed AR Button */}
 
           <button
             onClick={() => {
@@ -76,7 +66,7 @@ export const HeroSection: React.FC<Props> = ({
             className="flex items-center gap-2 px-5 sm:px-6 py-3.5 rounded-2xl glass-royal hover:border-amber-500/60 text-white font-cinzel font-bold text-sm sm:text-base transition-all transform hover:scale-105 active:scale-95 cursor-pointer shadow-lg"
           >
             <Eye className="w-5 h-5 text-amber-400" />
-            <span>Inspect 3D Monuments</span>
+            <span>Explore Monuments</span>
           </button>
 
           <button
@@ -110,18 +100,13 @@ export const HeroSection: React.FC<Props> = ({
             <span>{isAudioPlaying ? 'Mute Tanpura Drone' : 'Indian Classical Soundscape'}</span>
           </button>
 
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-black/50 border border-white/10 text-xs text-gray-300">
-            <Smartphone className="w-3.5 h-3.5 text-amber-400" />
-            <span>Phone Motion Gyro AR</span>
-          </div>
+          {/* Removed Mobile AR Badge */}
 
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-black/50 border border-white/10 text-xs text-gray-300">
             <span>🦁 Sacred Carved Beasts</span>
           </div>
 
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-black/50 border border-white/10 text-xs text-gray-300">
-            <span>🌐 WebXR & Scene Viewer</span>
-          </div>
+          {/* Removed WebXR Badge */}
         </div>
       </div>
 

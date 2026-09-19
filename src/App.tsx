@@ -10,7 +10,6 @@ import { VanishingCulture } from './components/heritage/VanishingCulture';
 import { PreserveStoryModal } from './components/heritage/PreserveStoryModal';
 import { AdoptHeritage } from './components/heritage/AdoptHeritage';
 import { DiscoverPage } from './components/heritage/DiscoverPage';
-import { AIChatAssistant } from './components/heritage/AIChatAssistant';
 import { HeritageMap } from './components/heritage/HeritageMap';
 import { CityExplorer } from './components/heritage/CityExplorer';
 import { StoriesPage } from './components/heritage/StoriesPage';
@@ -127,7 +126,6 @@ export function App() {
                 {/* 3. Preserving Culture */}
                 <AdoptHeritage />
 
-                <AIChatAssistant />
                 <HackathonWowMoment onStartPreserving={handleOpenUpload} />
               </div>
             )}
@@ -142,7 +140,6 @@ export function App() {
             {activePage === 'stories' && <StoriesPage />}
             {activePage === 'community' && <CommunityPage />}
             {activePage === 'profile' && <UserProfileDashboard />}
-            {activePage === 'ai-storyteller' && <AIChatAssistant />}
             {activePage === 'map' && <HeritageMap onCitySelect={handleSelectCity} />}
           </motion.div>
         </AnimatePresence>

@@ -29,13 +29,6 @@ export const CityCard: React.FC<Props> = ({ city, onClick }) => {
           <span className="text-[11px] text-amber-200/70">{city.stateName}</span>
         </div>
 
-        {/* AR Pill if available */}
-        {city.arEnabled && (
-          <div className="absolute top-3 right-3 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-black text-[10px] font-black uppercase tracking-wider shadow-md">
-            <Smartphone className="w-3 h-3" />
-            <span>3D/AR Ready</span>
-          </div>
-        )}
       </div>
 
       <div className="p-5 flex-1 flex flex-col justify-between">
