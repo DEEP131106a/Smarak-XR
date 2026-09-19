@@ -75,7 +75,8 @@ export function loginUser(
   roleTitle?: string,
   avatarUrl?: string,
   points?: number,
-  level?: number
+  level?: number,
+  isAdmin?: boolean
 ): UserProfile {
   const current = getUserProfile();
   const updated: UserProfile = {
@@ -88,12 +89,14 @@ export function loginUser(
     points: points !== undefined ? points : current.points,
     level: level !== undefined ? level : current.level,
     isLoggedIn: true,
+    isAdmin: isAdmin ?? false,
   };
 
   try {
     localStorage.setItem(STORAGE_AUTH_KEY, JSON.stringify({
       name: updated.name,
       email: updated.email,
+      isAdmin: updated.isAdmin,
       isLoggedIn: true,
       loginTime: new Date().toISOString(),
     }));
@@ -112,6 +115,7 @@ export function logoutUser(): void {
     const loggedOut: UserProfile = {
       ...current,
       isLoggedIn: false,
+      isAdmin: false,
     };
     saveUserProfile(loggedOut);
   } catch {

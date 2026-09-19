@@ -220,10 +220,17 @@ export const Navbar: React.FC<Props> = ({
                   className="w-6 h-6 rounded-full object-cover border border-[#d4af37]"
                 />
                 <div className="hidden sm:block text-left">
-                  <span className="text-[10px] text-amber-300 font-bold block leading-none truncate max-w-[90px]">
-                    {profile.name}
-                  </span>
-                  <span className="text-[9px] text-gray-400 leading-none">
+                  <div className="flex items-center gap-1.5 leading-none">
+                    <span className="text-[10px] text-amber-300 font-bold truncate max-w-[85px]">
+                      {profile.name}
+                    </span>
+                    {profile.isAdmin && (
+                      <span className="text-[8px] bg-gradient-to-r from-amber-400 to-amber-600 text-stone-950 font-black px-1.5 py-0.5 rounded font-mono uppercase tracking-wider shadow-sm">
+                        ADMIN
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[9px] text-gray-400 leading-none block mt-0.5">
                     {profile.points} PTS
                   </span>
                 </div>
@@ -326,6 +333,11 @@ export const Navbar: React.FC<Props> = ({
                   className="w-7 h-7 rounded-full object-cover border border-[#d4af37]"
                 />
                 <span className="text-xs text-amber-300 font-bold">{profile.name}</span>
+                {profile.isAdmin && (
+                  <span className="text-[8px] bg-gradient-to-r from-amber-400 to-amber-600 text-stone-950 font-black px-1.5 py-0.5 rounded font-mono uppercase tracking-wider">
+                    ADMIN
+                  </span>
+                )}
               </div>
               <button
                 onClick={() => {

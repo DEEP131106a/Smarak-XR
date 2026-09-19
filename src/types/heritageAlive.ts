@@ -137,6 +137,7 @@ export type UserProfile = {
   badges: UserBadge[];
   adoptedIds: string[];
   isLoggedIn?: boolean;
+  isAdmin?: boolean;
   email?: string;
 };
 
