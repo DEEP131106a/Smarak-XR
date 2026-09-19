@@ -17,6 +17,7 @@ import { CommunityPage } from './components/heritage/CommunityPage';
 import { UserProfileDashboard } from './components/heritage/UserProfileDashboard';
 import { GlobalSearchModal } from './components/heritage/GlobalSearchModal';
 import { Footer } from './components/heritage/Footer';
+import { LoginPage } from './components/heritage/LoginPage';
 import { ModelViewerWebXR } from './components/ModelViewerWebXR';
 import { CameraARViewer } from './components/CameraARViewer';
 import { MONUMENTS } from './data/monuments';
@@ -31,21 +32,36 @@ export function App() {
   const [activeArMonument, setActiveArMonument] = useState<Monument | null>(null);
   const [arViewerMode, setArViewerMode] = useState<'webxr' | 'camera'>('webxr');
 
-  // Handle URL deep-link parameters (e.g. from QR code scan on mobile)
+  // Handle URL deep-link parameters (e.g. from QR code scan on mobile, or ?page=login)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const arId = params.get('ar');
-    if (arId) {
+    const pageParam = params.get('page');
+
+    if (
+      pageParam === 'login' ||
+      window.location.pathname === '/login' ||
+      window.location.hash === '#login'
+    ) {
+      setActivePage('login');
+    } else if (arId) {
       const found = MONUMENTS.find(m => m.id === arId) || MONUMENTS[0];
       setActiveArMonument(found);
       setArViewerMode('webxr');
     }
   }, []);
 
-  // Handle page scrolling on navigation
+  // Handle page scrolling and URL update on navigation
   const handleNavigate = (page: string) => {
     setActivePage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (page === 'login') {
+      window.history.pushState({}, '', '?page=login');
+    } else if (page === 'home') {
+      window.history.pushState({}, '', window.location.pathname === '/login' ? '/' : window.location.pathname);
+    } else {
+      window.history.pushState({}, '', `?page=${page}`);
+    }
   };
 
   const handleSelectCity = (cityId: string) => {
@@ -140,6 +156,13 @@ export function App() {
             {activePage === 'stories' && <StoriesPage />}
             {activePage === 'community' && <CommunityPage />}
             {activePage === 'profile' && <UserProfileDashboard />}
+            {activePage === 'login' && (
+              <LoginPage
+                onLoginSuccess={() => handleNavigate('home')}
+                onExploreAsGuest={() => handleNavigate('home')}
+              />
+            )}
+            {activePage === 'ai-storyteller' && <AIChatAssistant />}
             {activePage === 'map' && <HeritageMap onCitySelect={handleSelectCity} />}
           </motion.div>
         </AnimatePresence>
@@ -175,3 +198,4 @@ export function App() {
 }
 
 export default App;
+

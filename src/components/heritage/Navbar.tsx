@@ -14,8 +14,11 @@ import {
   HeartHandshake,
   Users,
   Compass,
+  LogIn,
+  LogOut,
 } from 'lucide-react';
-import { getUserProfile, subscribeState } from '../../services/heritageStateService';
+import { getUserProfile, subscribeState, logoutUser } from '../../services/heritageStateService';
+import { soundEngine } from '../../services/soundEngine';
 import type { UserProfile } from '../../types/heritageAlive';
 import { triggerHaptic } from '../../utils/haptics';
 
@@ -204,23 +207,50 @@ export const Navbar: React.FC<Props> = ({
             )}
           </div>
 
-          {/* User Gamification Points & Profile Button (Section 15, 16) */}
-          <button
-            onClick={() => handleNavClick('profile')}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#1a1e2d] to-[#2a2238] border border-[#d4af37]/40 hover:border-[#d4af37] text-white cursor-pointer transition-all shadow-md"
-          >
-            <div className="w-6 h-6 rounded-full bg-[#d4af37] text-black font-black text-xs flex items-center justify-center">
-              ⚡
+          {/* User Sign In / Profile Action Buttons */}
+          {profile.isLoggedIn ? (
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => handleNavClick('profile')}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#1a1e2d] to-[#2a2238] border border-[#d4af37]/40 hover:border-[#d4af37] text-white cursor-pointer transition-all shadow-md"
+              >
+                <img
+                  src={profile.avatar}
+                  alt={profile.name}
+                  className="w-6 h-6 rounded-full object-cover border border-[#d4af37]"
+                />
+                <div className="hidden sm:block text-left">
+                  <span className="text-[10px] text-amber-300 font-bold block leading-none truncate max-w-[90px]">
+                    {profile.name}
+                  </span>
+                  <span className="text-[9px] text-gray-400 leading-none">
+                    {profile.points} PTS
+                  </span>
+                </div>
+              </button>
+
+              <button
+                onClick={() => {
+                  triggerHaptic('tap');
+                  soundEngine.playTempleBell(440, 1.2);
+                  logoutUser();
+                  handleNavClick('login');
+                }}
+                title="Sign Out of Smarak"
+                className="p-2 rounded-xl glass-heritage border border-rose-500/30 text-rose-300 hover:bg-rose-500/20 hover:text-white cursor-pointer transition-all"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
             </div>
-            <div className="hidden sm:block text-left">
-              <span className="text-[10px] text-amber-300 font-bold block leading-none">
-                {profile.points} PTS
-              </span>
-              <span className="text-[9px] text-gray-400 leading-none">
-                Lvl {profile.level}
-              </span>
-            </div>
-          </button>
+          ) : (
+            <button
+              onClick={() => handleNavClick('login')}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-[#d4af37] to-[#c85a32] hover:brightness-110 text-stone-950 font-bold text-xs shadow-lg shadow-[#d4af37]/25 transition-all transform hover:scale-105 active:scale-95 cursor-pointer"
+            >
+              <LogIn className="w-3.5 h-3.5 text-stone-950" />
+              <span>Sign In</span>
+            </button>
+          )}
 
           {/* Mobile Hamburger Toggle */}
           <button
@@ -230,7 +260,7 @@ export const Navbar: React.FC<Props> = ({
             }}
             className="xl:hidden p-2 rounded-xl glass-heritage border border-[#d4af37]/30 text-gray-300 hover:text-white cursor-pointer"
           >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
           </button>
         </div>
       </div>
@@ -286,6 +316,38 @@ export const Navbar: React.FC<Props> = ({
           >
             👤 Profile & Dashboard ({profile.points} Points)
           </button>
+
+          {profile.isLoggedIn ? (
+            <div className="pt-2 border-t border-stone-800 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <img
+                  src={profile.avatar}
+                  alt={profile.name}
+                  className="w-7 h-7 rounded-full object-cover border border-[#d4af37]"
+                />
+                <span className="text-xs text-amber-300 font-bold">{profile.name}</span>
+              </div>
+              <button
+                onClick={() => {
+                  triggerHaptic('tap');
+                  logoutUser();
+                  handleNavClick('login');
+                }}
+                className="text-xs text-rose-300 bg-rose-500/20 px-3 py-1.5 rounded-xl border border-rose-500/30 flex items-center gap-1.5 cursor-pointer"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Sign Out</span>
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => handleNavClick('login')}
+              className="w-full text-left py-2.5 px-3 rounded-xl bg-gradient-to-r from-[#d4af37]/20 to-[#c85a32]/20 text-amber-300 border border-[#d4af37]/30 flex items-center gap-2 font-bold cursor-pointer"
+            >
+              <LogIn className="w-4 h-4 text-[#d4af37]" />
+              <span>Sign In / Join Collective</span>
+            </button>
+          )}
         </div>
       )}
     </header>

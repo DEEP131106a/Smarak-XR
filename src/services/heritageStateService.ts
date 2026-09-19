@@ -23,6 +23,7 @@ const INITIAL_PROFILE: UserProfile = {
 
 const STORAGE_PROFILE_KEY = 'heritage_alive_profile';
 const STORAGE_STORIES_KEY = 'heritage_alive_user_stories';
+const STORAGE_AUTH_KEY = 'smarak_user';
 
 type Listener = () => void;
 const listeners: Set<Listener> = new Set();
@@ -34,6 +35,19 @@ export function subscribeState(listener: Listener): () => void {
 
 function notify(): void {
   listeners.forEach((fn) => fn());
+}
+
+export function isUserLoggedIn(): boolean {
+  try {
+    const raw = localStorage.getItem(STORAGE_AUTH_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.isLoggedIn) return true;
+    }
+  } catch {
+    // fallback
+  }
+  return false;
 }
 
 export function getUserProfile(): UserProfile {
@@ -53,6 +67,46 @@ export function saveUserProfile(profile: UserProfile): void {
     // ignore
   }
   notify();
+}
+
+export function loginUser(name: string, email?: string, roleTitle?: string, avatarUrl?: string): UserProfile {
+  const current = getUserProfile();
+  const updated: UserProfile = {
+    ...current,
+    name: name.trim() || 'Vansh',
+    email: email || '',
+    title: roleTitle || current.title,
+    avatar: avatarUrl || current.avatar,
+    isLoggedIn: true,
+  };
+
+  try {
+    localStorage.setItem(STORAGE_AUTH_KEY, JSON.stringify({
+      name: updated.name,
+      email: updated.email,
+      isLoggedIn: true,
+      loginTime: new Date().toISOString(),
+    }));
+  } catch {
+    // ignore
+  }
+
+  saveUserProfile(updated);
+  return updated;
+}
+
+export function logoutUser(): void {
+  try {
+    localStorage.removeItem(STORAGE_AUTH_KEY);
+    const current = getUserProfile();
+    const loggedOut: UserProfile = {
+      ...current,
+      isLoggedIn: false,
+    };
+    saveUserProfile(loggedOut);
+  } catch {
+    // ignore
+  }
 }
 
 export function addPoints(pts: number, reason?: string): UserProfile {

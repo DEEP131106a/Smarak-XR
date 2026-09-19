@@ -136,6 +136,8 @@ export type UserProfile = {
   challengesCompleted: number;
   badges: UserBadge[];
   adoptedIds: string[];
+  isLoggedIn?: boolean;
+  email?: string;
 };
 
 export type MapPinLocation = {

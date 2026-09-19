@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { User, Award, ShieldCheck, BookmarkCheck, BookOpen, Compass, Zap, Sparkles, TrendingUp } from 'lucide-react';
-import { getUserProfile, subscribeState } from '../../services/heritageStateService';
+import { User, Award, ShieldCheck, BookmarkCheck, BookOpen, Compass, Zap, Sparkles, TrendingUp, LogOut } from 'lucide-react';
+import { getUserProfile, subscribeState, logoutUser } from '../../services/heritageStateService';
 
 export const UserProfileDashboard: React.FC = () => {
   const [profile, setProfile] = useState(getUserProfile());
@@ -41,6 +41,16 @@ export const UserProfileDashboard: React.FC = () => {
               <span className="px-3.5 py-1 rounded-full text-xs font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/40">
                 {profile.levelName}
               </span>
+              <button
+                onClick={() => {
+                  logoutUser();
+                  window.location.search = '?page=login';
+                }}
+                className="px-3 py-1 rounded-full text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30 hover:bg-rose-500/30 transition-all cursor-pointer flex items-center gap-1.5"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Sign Out</span>
+              </button>
             </div>
 
             <p className="text-stone-400 text-sm">
