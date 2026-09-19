@@ -998,8 +998,140 @@ export class ProceduralModelBuilder {
         return this.buildQutubMinar(opts);
       case 'brihadisvara':
         return this.buildBrihadisvara(opts);
+      case 'golden-temple':
+        return this.buildGoldenTemple(opts);
       default:
         return this.buildTajMahal(opts);
     }
+  }
+
+  /**
+   * Procedural 3D Model: Sri Harmandir Sahib (Golden Temple, Amritsar)
+   * Includes Amrit Sarovar water basin, marble causeway, 4 cardinal open doors,
+   * two-storey gold-plated sanctum, corner chhatris, and crowning ribbed gold dome.
+   */
+  public static buildGoldenTemple(opts: ModelBuildOptions = {}): THREE.Group {
+    const group = new THREE.Group();
+    group.name = 'GoldenTemple';
+
+    const goldMat = this.getGoldMaterial(opts);
+    const marbleMat = this.getMaterial(opts.reconstructionMode ? 0xffffff : 0xf1efe7, opts);
+    const darkMat = this.getMaterial(0x1a1a24, opts);
+    const waterMat = new THREE.MeshStandardMaterial({
+      color: 0x0284c7,
+      roughness: 0.1,
+      metalness: 0.8,
+      transparent: true,
+      opacity: 0.85,
+    });
+
+    // 1. Holy Sarovar Water Pool (Large Blue Basin)
+    const pool = new THREE.Mesh(new THREE.BoxGeometry(8, 0.3, 8), waterMat);
+    pool.position.y = 0.15;
+    group.add(pool);
+
+    // Marble Parikrama Outer Edge & Plinth
+    const sarovarBorder = new THREE.Mesh(new THREE.BoxGeometry(8.4, 0.35, 8.4), marbleMat);
+    sarovarBorder.position.y = 0.12;
+    group.add(sarovarBorder);
+
+    // 2. White Marble Causeway Bridge (Darshani Deori to Sanctum)
+    const causeway = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.45, 3.8), marbleMat);
+    causeway.position.set(0, 0.28, 2.1);
+    group.add(causeway);
+
+    // Bridge Railings
+    const railingL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.3, 3.8), goldMat);
+    railingL.position.set(-0.55, 0.55, 2.1);
+    group.add(railingL);
+
+    const railingR = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.3, 3.8), goldMat);
+    railingR.position.set(0.55, 0.55, 2.1);
+    group.add(railingR);
+
+    // 3. Central Marble Island Plinth
+    const island = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.5, 4.2), marbleMat);
+    island.position.y = 0.3;
+    group.add(island);
+
+    // 4. Ground Floor Sanctum (Marble Base with Inlay)
+    const groundFloor = new THREE.Mesh(new THREE.BoxGeometry(3.2, 1.4, 3.2), marbleMat);
+    groundFloor.position.y = 1.15;
+    group.add(groundFloor);
+
+    // Four Open Doorways (Universal Welcome on 4 Cardinal Directions)
+    for (let i = 0; i < 4; i++) {
+      const door = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.1, 0.2), darkMat);
+      door.position.y = 1.05;
+      door.rotation.y = (i * Math.PI) / 2;
+      door.translateZ(1.52);
+      group.add(door);
+
+      // Gold Torana Arch over each door
+      const doorFrame = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.12, 0.22), goldMat);
+      doorFrame.position.y = 1.65;
+      doorFrame.rotation.y = (i * Math.PI) / 2;
+      doorFrame.translateZ(1.52);
+      group.add(doorFrame);
+    }
+
+    // 5. First Floor — Gleaming Pure 24K Gold Plating
+    const goldFloor = new THREE.Mesh(new THREE.BoxGeometry(3.0, 1.2, 3.0), goldMat);
+    goldFloor.position.y = 2.45;
+    group.add(goldFloor);
+
+    // Decorative Golden Jali / Windows on Upper Floor
+    for (let i = 0; i < 4; i++) {
+      const windowCutout = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.7, 0.1), darkMat);
+      windowCutout.position.y = 2.45;
+      windowCutout.rotation.y = (i * Math.PI) / 2;
+      windowCutout.translateZ(1.46);
+      group.add(windowCutout);
+    }
+
+    // Golden Cornice / Eaves (Chhajja)
+    const chhajja = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.15, 3.4), goldMat);
+    chhajja.position.y = 3.12;
+    group.add(chhajja);
+
+    // 6. Rooftop Golden Chhatris (4 Corner Domes)
+    const cornerOffsets = [
+      [-1.2, -1.2],
+      [1.2, -1.2],
+      [-1.2, 1.2],
+      [1.2, 1.2],
+    ];
+    for (const [cx, cz] of cornerOffsets) {
+      const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.5, 8), goldMat);
+      pillar.position.set(cx, 3.45, cz);
+      group.add(pillar);
+
+      const chhatriDome = new THREE.Mesh(
+        new THREE.SphereGeometry(0.32, 16, 12, 0, Math.PI * 2, 0, Math.PI * 0.6),
+        goldMat
+      );
+      chhatriDome.position.set(cx, 3.75, cz);
+      group.add(chhatriDome);
+    }
+
+    // 7. Central Fluted Golden Dome (The Crown of Harmandir Sahib)
+    const domeDrum = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 1.05, 0.4, 24), goldMat);
+    domeDrum.position.y = 3.4;
+    group.add(domeDrum);
+
+    const mainDome = new THREE.Mesh(
+      new THREE.SphereGeometry(1.05, 24, 16, 0, Math.PI * 2, 0, Math.PI * 0.7),
+      goldMat
+    );
+    mainDome.scale.set(1.0, 1.2, 1.0);
+    mainDome.position.y = 3.65;
+    group.add(mainDome);
+
+    // Golden Lotus Kalasha Finial
+    const finial = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.75, 16), goldMat);
+    finial.position.y = 4.95;
+    group.add(finial);
+
+    return group;
   }
 }

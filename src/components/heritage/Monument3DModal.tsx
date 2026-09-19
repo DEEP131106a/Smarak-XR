@@ -9,8 +9,9 @@ import type { CityItem } from "../../data/cityData";
 import type { Monument, MonumentId } from "../../types";
 
 const MONUMENT_NAME_MAP: [string, MonumentId][] = [
-  ["golden temple",     "taj-mahal"],
-  ["harmandir sahib",   "taj-mahal"],
+  ["golden temple",     "golden-temple"],
+  ["harmandir sahib",   "golden-temple"],
+  ["harmandir",         "golden-temple"],
   ["jallianwala",       "hawa-mahal"],
   ["wagah",             "qutub-minar"],
   ["akal takht",        "meenakshi-amman"],

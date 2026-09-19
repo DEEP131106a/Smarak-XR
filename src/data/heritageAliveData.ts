@@ -152,7 +152,7 @@ export const TIME_MACHINE_LOCATIONS: TimeMachineLocation[] = [
         food: 'Artisanal organic millet dhabas, global Punjabi fusion cuisine, packaged Lassi blends.',
         music: 'Global Punjabi Pop, Lo-Fi Tumbi remixes, streaming digital folk archives.',
         lifestyle: 'Digital connectivity, NRI cultural exchange, heritage homestays, active online preservation.',
-        image: 'https://images.unsplash.com/photo-1514222709107-a180c68d72b4?auto=format&fit=crop&w=800&q=80',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/Two_Sikhs.jpg/1280px-Two_Sikhs.jpg',
       },
       2050: {
         year: 2050,

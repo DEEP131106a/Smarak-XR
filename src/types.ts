@@ -8,7 +8,8 @@ export type MonumentId =
   | 'hawa-mahal'
   | 'hampi-chariot'
   | 'qutub-minar'
-  | 'brihadisvara';
+  | 'brihadisvara'
+  | 'golden-temple';
 
 export type CreatureId =
   | 'yali'

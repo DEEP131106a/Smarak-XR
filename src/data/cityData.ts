@@ -80,7 +80,7 @@ export const CITY_DATA: CityData[] = [
         dress: 'Phulkari hand-embroidered shawls (Bagh), Nankeen cotton Kurtas, Silk Patiala Salwars, leather Punjabi Juttis',
         music: 'Tumbi & Algoza played under banyan trees; Gurbani Kirtan in Harmandir Sahib 24/7',
         life: 'Communal agrarian life, Persian water wells, weekly Vaisakhi fairs, artisan guilds in bazaars',
-        image: 'https://images.unsplash.com/photo-1605649487212-47bdab064df7?auto=format&fit=crop&w=800&q=80',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/The_Golden_Temple_of_Amrithsar_7.jpg/1280px-The_Golden_Temple_of_Amrithsar_7.jpg',
       },
       {
         year: '1900–1970s',
@@ -110,7 +110,7 @@ export const CITY_DATA: CityData[] = [
         dress: 'Urban Punjabi streetwear fusion; Phulkari going global via fashion weeks; sustainability-focused Jutti design',
         music: 'AR Rahman collaborates with Gurbani musicians; Lo-Fi Tumbi remixes on Spotify; live Kirtan streaming worldwide',
         life: 'Smart heritage zones; Golden Temple AR experiences; Langar (community kitchen) serving 100,000 meals/day',
-        image: 'https://images.unsplash.com/photo-1514222709107-a180c68d72b4?auto=format&fit=crop&w=800&q=80',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/Two_Sikhs.jpg/1280px-Two_Sikhs.jpg',
       },
     ],
     items: [
@@ -402,7 +402,7 @@ export const CITY_DATA: CityData[] = [
         dress: 'Simplified turbans for middle class; Leheriya (wave-dyed) sarees became commercially popular',
         music: 'AIR Radio broadcast Manganiyar recordings; state patronage of folk arts',
         life: 'Heritage palace conversion to hotels; government craft cooperatives; rural artisan employment',
-        image: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=800&q=80',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Amber_Fort_Jaipur.jpg/1280px-Amber_Fort_Jaipur.jpg',
       },
       {
         year: '2000s–Present',
