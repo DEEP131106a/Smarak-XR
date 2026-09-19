@@ -69,14 +69,24 @@ export function saveUserProfile(profile: UserProfile): void {
   notify();
 }
 
-export function loginUser(name: string, email?: string, roleTitle?: string, avatarUrl?: string): UserProfile {
+export function loginUser(
+  name: string,
+  email?: string,
+  roleTitle?: string,
+  avatarUrl?: string,
+  points?: number,
+  level?: number
+): UserProfile {
   const current = getUserProfile();
   const updated: UserProfile = {
     ...current,
     name: name.trim() || 'Vansh',
     email: email || '',
     title: roleTitle || current.title,
+    levelName: roleTitle || current.levelName,
     avatar: avatarUrl || current.avatar,
+    points: points !== undefined ? points : current.points,
+    level: level !== undefined ? level : current.level,
     isLoggedIn: true,
   };
 
