@@ -37,6 +37,7 @@ export type CityTimeline = {
 export type CityData = {
   id: string;
   name: string;
+  hindiName?: string;
   state: string;
   country: string;
   tagline: string;
@@ -1691,3 +1692,4 @@ export const getAllVanishingItems = () => {
       .map((item) => ({ ...item, cityName: city.name, stateName: city.state }))
   );
 };
+

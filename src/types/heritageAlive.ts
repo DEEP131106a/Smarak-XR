@@ -108,6 +108,7 @@ export type CommunityChallenge = {
   title: string;
   description: string;
   category: string;
+  hindiName?: string;
   points: number;
   deadline: string;
   progress: number;
@@ -151,4 +152,6 @@ export type MapPinLocation = {
   significance: string;
   nearbyTraditions: string[];
   category: string;
+  hindiName?: string;
 };
+

@@ -161,9 +161,7 @@ export function App() {
                 onLoginSuccess={() => handleNavigate('home')}
                 onExploreAsGuest={() => handleNavigate('home')}
               />
-            )}
-            {activePage === 'ai-storyteller' && <AIChatAssistant />}
-            {activePage === 'map' && <HeritageMap onCitySelect={handleSelectCity} />}
+            )}            {activePage === 'map' && <HeritageMap onCitySelect={handleSelectCity} />}
           </motion.div>
         </AnimatePresence>
       </main>
@@ -198,4 +196,5 @@ export function App() {
 }
 
 export default App;
+
 
