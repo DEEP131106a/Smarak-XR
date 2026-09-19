@@ -39,6 +39,16 @@ export const CityDetailPage: React.FC<Props> = ({ city, onNavigate, onOpenAR }) 
 
       {/* 1. City Hero Section (Rule 9) */}
       <div className="relative rounded-3xl glass-royal border border-amber-500/30 p-8 sm:p-12 overflow-hidden mb-12 shadow-2xl">
+        {city.heroImage && (
+          <div className="absolute inset-0 z-0 pointer-events-none">
+            <img
+              src={city.heroImage}
+              alt={city.name}
+              className="w-full h-full object-cover opacity-20 filter saturate-150"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/80 to-transparent" />
+          </div>
+        )}
         <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 max-w-3xl">
@@ -198,10 +208,21 @@ export const CityDetailPage: React.FC<Props> = ({ city, onNavigate, onOpenAR }) 
                 }}
                 className="group relative rounded-2xl glass-royal border border-amber-500/20 aspect-video flex flex-col items-center justify-center p-3 text-center cursor-pointer hover:border-amber-500/60 transition-all overflow-hidden"
               >
-                <ImageIcon className="w-8 h-8 text-amber-400/60 mb-1 group-hover:scale-110 transition-transform" />
-                <span className="text-xs font-bold text-white font-cinzel">{img.title}</span>
-                <span className="text-[10px] text-amber-200/60 line-clamp-1">{img.caption}</span>
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-amber-300">
+                {img.imageUrl ? (
+                  <img
+                    src={img.imageUrl}
+                    alt={img.title}
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                ) : (
+                  <ImageIcon className="w-8 h-8 text-amber-400/60 mb-1 group-hover:scale-110 transition-transform" />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent flex flex-col justify-end p-2.5 z-10 text-left">
+                  <span className="text-xs font-bold text-white font-cinzel line-clamp-1">{img.title}</span>
+                  <span className="text-[10px] text-amber-200/80 line-clamp-1">{img.caption}</span>
+                </div>
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-amber-300 z-20">
                   <Maximize2 className="w-5 h-5" />
                 </div>
               </div>
@@ -230,19 +251,33 @@ export const CityDetailPage: React.FC<Props> = ({ city, onNavigate, onOpenAR }) 
       {/* Gallery Lightbox Modal */}
       {activeImageModal && (
         <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="relative max-w-lg w-full p-6 rounded-3xl glass-royal border border-amber-500/40 text-center">
+          <div className="relative max-w-2xl w-full p-6 rounded-3xl glass-royal border border-amber-500/40 text-center animate-in zoom-in-95">
             <button
               onClick={() => setActiveImageModal(null)}
-              className="absolute top-4 right-4 p-2 rounded-xl bg-black/60 text-white cursor-pointer"
+              className="absolute top-4 right-4 p-2 rounded-xl bg-black/60 text-white cursor-pointer z-10"
             >
               <X className="w-5 h-5" />
             </button>
-            <div className="w-full h-56 rounded-2xl bg-amber-950/60 border border-amber-500/30 flex flex-col items-center justify-center p-4 mb-4">
-              <ImageIcon className="w-12 h-12 text-amber-400 mb-2 animate-pulse" />
-              <span className="font-cinzel text-lg font-bold text-white">{activeImageModal}</span>
-            </div>
-            <p className="text-xs text-amber-200/70 font-outfit">
-              Image Lightbox View Placeholder for {activeImageModal}
+            {(() => {
+              const activeImg = city.galleryImages.find((g) => g.title === activeImageModal);
+              return activeImg?.imageUrl ? (
+                <div className="w-full h-80 rounded-2xl overflow-hidden border border-amber-500/40 mb-4 relative">
+                  <img
+                    src={activeImg.imageUrl}
+                    alt={activeImg.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="w-full h-56 rounded-2xl bg-amber-950/60 border border-amber-500/30 flex flex-col items-center justify-center p-4 mb-4">
+                  <ImageIcon className="w-12 h-12 text-amber-400 mb-2 animate-pulse" />
+                  <span className="font-cinzel text-lg font-bold text-white">{activeImageModal}</span>
+                </div>
+              );
+            })()}
+            <h4 className="font-cinzel text-xl font-bold text-white mb-1">{activeImageModal}</h4>
+            <p className="text-xs text-amber-200/80 font-outfit">
+              {city.galleryImages.find((g) => g.title === activeImageModal)?.caption}
             </p>
           </div>
         </div>

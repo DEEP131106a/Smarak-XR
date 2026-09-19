@@ -16,6 +16,7 @@ export type PlaceToVisit = {
   fullDescription?: string;
   location?: string;
   imagePlaceholder?: string;
+  imageUrl?: string;
   arAvailable?: boolean;
 };
 
@@ -32,6 +33,7 @@ export type CulturalEntry = {
   occasions?: string[];
   mediaStatus: 'coming_soon' | 'available';
   imagePlaceholder?: string;
+  imageUrl?: string;
   videoPlaceholderText?: string;
   audioPlaceholderText?: string;
 };
@@ -55,10 +57,11 @@ export type CityItem = {
   tagline: string;
   description: string;
   heroPlaceholder?: string;
+  heroImage?: string;
   historyTimeline: TimelineEvent[];
   placesToVisit: PlaceToVisit[];
   culture: CityCultureData;
-  galleryImages: { id: string; title: string; caption: string }[];
+  galleryImages: { id: string; title: string; caption: string; imageUrl?: string }[];
   videoCount: number;
   arEnabled?: boolean;
 };

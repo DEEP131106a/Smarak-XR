@@ -142,7 +142,9 @@ export type MapPinLocation = {
   id: string;
   name: string;
   state: string;
+  stateId?: string;
   coords: { x: number; y: number }; // Percentage offsets for map UI
+  svgCoords?: { x: number; y: number }; // Absolute SVG viewBox coordinates (0 0 612 696)
   significance: string;
   nearbyTraditions: string[];
   category: string;

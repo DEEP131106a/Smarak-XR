@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Navigation, Sparkles, X, ChevronRight, Compass } from 'lucide-react';
+import { MapPin, Navigation, Sparkles, ChevronRight, Compass } from 'lucide-react';
 import { MAP_LOCATIONS } from '../../data/heritageAliveData';
+import { INDIA_MAP_DATA } from '../../data/indiaMapSvgData';
+import { getCityById } from '../../data/cityData';
 import type { MapPinLocation } from '../../types/heritageAlive';
+import { triggerHaptic } from '../../utils/haptics';
 
 interface Props {
   onCitySelect?: (cityId: string) => void;
@@ -10,6 +13,7 @@ interface Props {
 
 export const HeritageMap: React.FC<Props> = ({ onCitySelect }) => {
   const [selectedPin, setSelectedPin] = useState<MapPinLocation | null>(MAP_LOCATIONS[0]);
+  const activeCityData = selectedPin ? getCityById(selectedPin.id) : null;
 
   return (
     <div className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto min-h-screen">
@@ -30,68 +34,147 @@ export const HeritageMap: React.FC<Props> = ({ onCitySelect }) => {
       {/* Map Container Area */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Stylized SVG Map Display (Left 7 Cols) */}
-        <div className="lg:col-span-7 glass-heritage p-6 rounded-3xl border border-amber-500/20 relative min-h-[480px] shadow-2xl flex flex-col justify-between overflow-hidden">
-          <div className="flex items-center justify-between text-xs text-stone-400 mb-4 z-10">
+        <div className="lg:col-span-7 glass-heritage p-6 rounded-3xl border border-amber-500/20 relative min-h-[540px] shadow-2xl flex flex-col justify-between overflow-hidden">
+          <div className="flex items-center justify-between text-xs text-stone-400 mb-2 z-10">
             <span className="flex items-center gap-1 font-bold text-amber-400 uppercase tracking-widest">
               <Navigation className="w-3.5 h-3.5" /> Interactive Map of India
             </span>
-            <span className="bg-stone-900 px-3 py-1 rounded-full border border-stone-800">
+            <span className="bg-stone-900 px-3 py-1 rounded-full border border-stone-800 text-amber-300 font-semibold">
               6 Active Cultural Hubs
             </span>
           </div>
 
-          {/* India SVG Graphic Outline Background */}
-          <div className="relative w-full h-[400px] flex items-center justify-center my-4">
+          {/* Authentic India SVG Map */}
+          <div className="relative w-full h-[480px] sm:h-[520px] flex items-center justify-center my-2 select-none">
             <svg
-              viewBox="0 0 600 600"
-              className="w-full h-full opacity-30 drop-shadow-lg"
-              fill="none"
-              stroke="currentColor"
+              viewBox={INDIA_MAP_DATA.viewBox}
+              className="w-full h-full max-h-[500px] drop-shadow-2xl"
             >
-              {/* Stylized contour of India */}
-              <path
-                d="M 220 70 L 300 110 L 340 180 L 450 250 L 430 320 L 380 340 L 300 520 L 250 480 L 190 380 L 170 280 L 220 70 Z"
-                className="stroke-amber-500/40 fill-amber-500/5 stroke-2"
-              />
-              <circle cx="300" cy="300" r="220" className="stroke-amber-500/10 stroke-1 stroke-dasharray-4" />
-            </svg>
+              <defs>
+                <linearGradient id="activeStateGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#d4af37" stopOpacity="0.3" />
+                  <stop offset="100%" stopColor="#c85a32" stopOpacity="0.15" />
+                </linearGradient>
+              </defs>
 
-            {/* Pins positioned absolutely based on coords */}
-            {MAP_LOCATIONS.map((pin) => {
-              const isSelected = selectedPin?.id === pin.id;
-              return (
-                <button
-                  key={pin.id}
-                  onClick={() => setSelectedPin(pin)}
-                  style={{ left: `${pin.coords.x}%`, top: `${pin.coords.y}%` }}
-                  className="absolute transform -translate-x-1/2 -translate-y-1/2 group z-20"
-                >
-                  <div className="relative flex items-center justify-center">
+              {/* All 36 Indian States and Union Territories */}
+              <g id="india-states">
+                {INDIA_MAP_DATA.locations.map((loc) => {
+                  const isCityState = MAP_LOCATIONS.some((p) => p.stateId === loc.id);
+                  const isSelected = selectedPin?.stateId === loc.id;
+                  return (
+                    <path
+                      key={loc.id}
+                      id={`state-${loc.id}`}
+                      d={loc.path}
+                      onClick={() => {
+                        const matchingPin = MAP_LOCATIONS.find((p) => p.stateId === loc.id);
+                        if (matchingPin) {
+                          triggerHaptic('tap');
+                          setSelectedPin(matchingPin);
+                        }
+                      }}
+                      className={`transition-all duration-300 ${
+                        isCityState ? 'cursor-pointer' : 'cursor-default'
+                      }`}
+                      style={{
+                        fill: isSelected
+                          ? 'url(#activeStateGrad)'
+                          : isCityState
+                          ? '#1e1a16'
+                          : '#121110',
+                        stroke: isSelected
+                          ? '#f59e0b'
+                          : isCityState
+                          ? 'rgba(212, 175, 55, 0.6)'
+                          : 'rgba(120, 113, 108, 0.25)',
+                        strokeWidth: isSelected ? 1.6 : isCityState ? 1.0 : 0.5,
+                      }}
+                    >
+                      <title>{loc.name}</title>
+                    </path>
+                  );
+                })}
+              </g>
+
+              {/* City Markers for the 6 Cities */}
+              {MAP_LOCATIONS.map((pin) => {
+                const isSelected = selectedPin?.id === pin.id;
+                const coords = pin.svgCoords || {
+                  x: (pin.coords.x / 100) * 612,
+                  y: (pin.coords.y / 100) * 696,
+                };
+                return (
+                  <g
+                    key={pin.id}
+                    transform={`translate(${coords.x}, ${coords.y})`}
+                    onClick={() => {
+                      triggerHaptic('tap');
+                      setSelectedPin(pin);
+                    }}
+                    className="cursor-pointer group"
+                  >
+                    {/* Pulsing ring on active city */}
                     {isSelected && (
-                      <span className="absolute w-10 h-10 rounded-full bg-amber-500/30 animate-ping" />
+                      <circle
+                        r="18"
+                        className="fill-amber-400/30 animate-ping"
+                      />
                     )}
-                    <div
-                      className={`p-2.5 rounded-full transition-all duration-300 shadow-xl flex items-center justify-center ${
+
+                    <circle
+                      r={isSelected ? '10' : '6.5'}
+                      className={`transition-all duration-300 ${
                         isSelected
-                          ? 'bg-amber-500 text-stone-950 scale-125 shadow-amber-500/50 ring-4 ring-amber-500/30'
-                          : 'bg-stone-900 text-amber-400 border border-amber-500/40 hover:scale-110 hover:border-amber-400'
+                          ? 'fill-amber-400 stroke-stone-950 stroke-2'
+                          : 'fill-stone-950 stroke-amber-400/90 stroke-2 group-hover:fill-amber-500'
+                      }`}
+                    />
+                    <circle
+                      r={isSelected ? '4' : '2.5'}
+                      className={isSelected ? 'fill-stone-950' : 'fill-amber-300'}
+                    />
+
+                    {/* City Name Label Pill */}
+                    <g
+                      transform="translate(0, -15)"
+                      className={`transition-all duration-200 pointer-events-none ${
+                        isSelected
+                          ? 'opacity-100 scale-110'
+                          : 'opacity-85 group-hover:opacity-100 group-hover:scale-105'
                       }`}
                     >
-                      <MapPin className="w-5 h-5" />
-                    </div>
-
-                    {/* Tooltip on pin hover */}
-                    <div className="absolute top-10 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-stone-900/90 text-amber-300 text-xs px-2.5 py-1 rounded-lg border border-amber-500/30 font-bold z-30 shadow-lg">
-                      {pin.name}
-                    </div>
-                  </div>
-                </button>
-              );
-            })}
+                      <rect
+                        x="-38"
+                        y="-12"
+                        width="76"
+                        height="16"
+                        rx="8"
+                        className={
+                          isSelected
+                            ? 'fill-amber-500 stroke-stone-950 stroke-1 shadow-lg'
+                            : 'fill-stone-950/95 stroke-amber-500/40 stroke-1'
+                        }
+                      />
+                      <text
+                        x="0"
+                        y="-1"
+                        textAnchor="middle"
+                        fontSize="8.5"
+                        fontWeight="bold"
+                        className={isSelected ? 'fill-stone-950 font-cinzel font-black' : 'fill-amber-200 font-cinzel'}
+                      >
+                        {pin.name}
+                      </text>
+                    </g>
+                  </g>
+                );
+              })}
+            </svg>
           </div>
 
-          <div className="text-center text-xs text-stone-500 italic z-10">
-            Click any pin to inspect nearby vanishing traditions and regional heritage hubs.
+          <div className="text-center text-xs text-stone-500 italic z-10 pt-2 border-t border-stone-800/40">
+            Click any city pin or highlighted state to inspect regional traditions.
           </div>
         </div>
 
@@ -114,6 +197,22 @@ export const HeritageMap: React.FC<Props> = ({ onCitySelect }) => {
                   <h2 className="text-3xl font-extrabold text-stone-100 mt-2">{selectedPin.name}</h2>
                   <p className="text-amber-400/90 text-sm font-semibold">{selectedPin.state}</p>
                 </div>
+
+                {activeCityData?.heroImage && (
+                  <div className="w-full h-44 rounded-2xl overflow-hidden border border-amber-500/40 relative shadow-lg group">
+                    <img
+                      src={activeCityData.heroImage}
+                      alt={selectedPin.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+                    <div className="absolute bottom-2.5 left-3.5 right-3.5">
+                      <p className="text-xs font-cinzel font-bold text-amber-200 line-clamp-1">
+                        {activeCityData.tagline}
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 <div>
                   <h4 className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2">Cultural Significance</h4>

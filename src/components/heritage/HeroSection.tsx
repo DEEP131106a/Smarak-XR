@@ -13,10 +13,10 @@ interface Props {
 const FEATURED_CITIES = [
   { id: 'amritsar', name: 'Amritsar', state: 'Punjab', highlight: 'Golden Temple • Kulcha • Bhangra • Phulkari', icon: '🛕' },
   { id: 'jaipur', name: 'Jaipur', state: 'Rajasthan', highlight: 'Hawa Mahal • Dal Baati • Ghoomar • Bandhani', icon: '🏰' },
-  { id: 'varanasi', name: 'Varanasi', state: 'Uttar Pradesh', highlight: 'Ganga Aarti • Banarasi Silk • Thandai', icon: '🪔' },
-  { id: 'mumbai', name: 'Mumbai', state: 'Maharashtra', highlight: 'Gateway • Vada Pav • Lavani • Dabbawalas', icon: '🌊' },
-  { id: 'kolkata', name: 'Kolkata', state: 'West Bengal', highlight: 'Durga Puja • Rosogolla • Nakshi Kantha', icon: '🎨' },
-  { id: 'kochi', name: 'Kochi', state: 'Kerala', highlight: 'Kathakali • Kerala Sadya • Fishing Nets', icon: '🎭' },
+  { id: 'dharamshala', name: 'Dharamshala', state: 'Himachal Pradesh', highlight: 'Tsuglagkhang • Kangra Fort • Dham • Momos', icon: '🏔️' },
+  { id: 'mumbai', name: 'Mumbai', state: 'Maharashtra', highlight: 'Gateway • Vada Pav • Lavani • Elephanta', icon: '🌊' },
+  { id: 'kolkata', name: 'Kolkata', state: 'West Bengal', highlight: 'Victoria Memorial • Rosogolla • Baul • Tant', icon: '🎨' },
+  { id: 'chandigarh', name: 'Chandigarh', state: 'Punjab & Haryana', highlight: 'Capitol Complex • Rock Garden • Corbusier • Bhangra', icon: '🏛️' },
 ];
 
 export const HeroSection: React.FC<Props> = ({

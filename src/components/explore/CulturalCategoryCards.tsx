@@ -53,7 +53,19 @@ export const FoodCard: React.FC<CardProps> = ({ item }) => (
       )}
     </div>
 
-    <MediaPlaceholder type="image" title={`${item.title} Food Image Coming Soon`} />
+    {item.imageUrl ? (
+      <div className="w-full h-48 rounded-2xl overflow-hidden border border-emerald-500/30 relative group mt-2">
+        <img
+          src={item.imageUrl}
+          alt={item.title}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          loading="lazy"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
+      </div>
+    ) : (
+      <MediaPlaceholder type="image" title={`${item.title} Food Image Coming Soon`} />
+    )}
   </div>
 );
 
@@ -88,11 +100,23 @@ export const DanceCard: React.FC<CardProps> = ({ item }) => (
       )}
     </div>
 
-    <MediaPlaceholder
-      type="video"
-      title={item.videoPlaceholderText || 'Dance Video Coming Soon'}
-      subtitle="Performance footage will appear here once published from the backend."
-    />
+    {item.imageUrl ? (
+      <div className="w-full h-48 rounded-2xl overflow-hidden border border-amber-500/30 relative group mt-2">
+        <img
+          src={item.imageUrl}
+          alt={item.title}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          loading="lazy"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
+      </div>
+    ) : (
+      <MediaPlaceholder
+        type="video"
+        title={item.videoPlaceholderText || 'Dance Video Coming Soon'}
+        subtitle="Performance footage will appear here once published from the backend."
+      />
+    )}
   </div>
 );
 
@@ -121,11 +145,23 @@ export const MusicCard: React.FC<CardProps> = ({ item }) => (
       </p>
     </div>
 
-    <MediaPlaceholder
-      type="audio"
-      title={item.audioPlaceholderText || 'Soundscape Track'}
-      subtitle="Disabled audio player placeholder"
-    />
+    {item.imageUrl ? (
+      <div className="w-full h-48 rounded-2xl overflow-hidden border border-rose-500/30 relative group mt-2">
+        <img
+          src={item.imageUrl}
+          alt={item.title}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          loading="lazy"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
+      </div>
+    ) : (
+      <MediaPlaceholder
+        type="audio"
+        title={item.audioPlaceholderText || 'Soundscape Track'}
+        subtitle="Disabled audio player placeholder"
+      />
+    )}
   </div>
 );
 
@@ -154,7 +190,19 @@ export const ClothingCard: React.FC<CardProps> = ({ item }) => (
       </p>
     </div>
 
-    <MediaPlaceholder type="image" title={`${item.title} Textile Photo Coming Soon`} />
+    {item.imageUrl ? (
+      <div className="w-full h-48 rounded-2xl overflow-hidden border border-purple-500/30 relative group mt-2">
+        <img
+          src={item.imageUrl}
+          alt={item.title}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          loading="lazy"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
+      </div>
+    ) : (
+      <MediaPlaceholder type="image" title={`${item.title} Textile Photo Coming Soon`} />
+    )}
   </div>
 );
 
@@ -179,7 +227,19 @@ export const CraftCard: React.FC<CardProps> = ({ item }) => (
       </p>
     </div>
 
-    <MediaPlaceholder type="image" title={`${item.title} Craft Photo Coming Soon`} />
+    {item.imageUrl ? (
+      <div className="w-full h-48 rounded-2xl overflow-hidden border border-amber-500/30 relative group mt-2">
+        <img
+          src={item.imageUrl}
+          alt={item.title}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          loading="lazy"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
+      </div>
+    ) : (
+      <MediaPlaceholder type="image" title={`${item.title} Craft Photo Coming Soon`} />
+    )}
   </div>
 );
 
@@ -204,7 +264,19 @@ export const FestivalCard: React.FC<CardProps> = ({ item }) => (
       </p>
     </div>
 
-    <MediaPlaceholder type="image" title={`${item.title} Celebration Photo Coming Soon`} />
+    {item.imageUrl ? (
+      <div className="w-full h-48 rounded-2xl overflow-hidden border border-orange-500/30 relative group mt-2">
+        <img
+          src={item.imageUrl}
+          alt={item.title}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          loading="lazy"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
+      </div>
+    ) : (
+      <MediaPlaceholder type="image" title={`${item.title} Celebration Photo Coming Soon`} />
+    )}
   </div>
 );
 
@@ -232,6 +304,18 @@ export const StoryCard: React.FC<CardProps> = ({ item }) => (
         {item.description}
       </p>
     </div>
+
+    {item.imageUrl ? (
+      <div className="w-full h-48 rounded-2xl overflow-hidden border border-cyan-500/30 relative group mt-2 mb-3">
+        <img
+          src={item.imageUrl}
+          alt={item.title}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          loading="lazy"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
+      </div>
+    ) : null}
 
     <div className="pt-3 border-t border-amber-500/15 flex items-center justify-between text-xs font-bold text-cyan-300">
       <span>Read Story →</span>
