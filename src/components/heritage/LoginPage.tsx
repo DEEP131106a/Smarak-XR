@@ -101,7 +101,7 @@ function validateUserPassword(pwd: string): PasswordValidationResult {
       isOnlyDigits: true,
       isOnlyLetters: false,
       hasMinLength,
-      message: 'Only alphanumeric password is required! Please include letters as well as numbers.',
+      message: 'Password not acceptable. Only alphanumeric passwords (must include letters as well as numbers) are allowed.',
     };
   }
 
@@ -113,7 +113,7 @@ function validateUserPassword(pwd: string): PasswordValidationResult {
       isOnlyDigits: false,
       isOnlyLetters: true,
       hasMinLength,
-      message: 'Only alphanumeric password is required! Please include numbers as well as letters (e.g., Heritage2024).',
+      message: 'Password not acceptable. Only alphanumeric passwords (must include numbers as well as letters) are allowed.',
     };
   }
 
@@ -125,7 +125,7 @@ function validateUserPassword(pwd: string): PasswordValidationResult {
       isOnlyDigits: false,
       isOnlyLetters: false,
       hasMinLength: false,
-      message: 'Password must be at least 6 characters long and alphanumeric.',
+      message: 'Password not acceptable. Must be at least 6 characters and alphanumeric.',
     };
   }
 
@@ -137,7 +137,7 @@ function validateUserPassword(pwd: string): PasswordValidationResult {
       isOnlyDigits: false,
       isOnlyLetters: false,
       hasMinLength,
-      message: 'Only alphanumeric password is required! Must contain both letters and numbers (e.g., Explorer2026).',
+      message: 'Password not acceptable. Only alphanumeric passwords (containing both letters and numbers) are allowed.',
     };
   }
 
@@ -191,23 +191,11 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess, onExploreAsGuest })
         return;
       }
 
-      // Check if username attempts to clash with admin usernames
-      const isReserved = USERS_DATABASE.some(
-        (u) =>
-          u.username.toLowerCase() === trimmedUser.toLowerCase() ||
-          u.name.toLowerCase() === trimmedUser.toLowerCase()
-      );
-      if (isReserved) {
-        setError('This username is reserved. Please select another username.');
-        triggerHaptic('heavy');
-        return;
-      }
-
-      // STRICT ALPHANUMERIC PASSWORD VALIDATION FOR REGULAR USERS
+      // 1. FIRST: STRICT ALPHANUMERIC PASSWORD VALIDATION
       if (!pwdValidation.isValid) {
         const alertMsg =
           pwdValidation.message ||
-          'Only alphanumeric password is required to set the password! Please include both letters and numbers (e.g., Heritage2026).';
+          'Password not acceptable. Only alphanumeric passwords (containing both letters and numbers) are allowed.';
 
         setError(alertMsg);
         triggerHaptic('heavy');
@@ -215,13 +203,13 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess, onExploreAsGuest })
         // Explicit browser alert as requested
         if (typeof window !== 'undefined') {
           window.alert(
-            '⚠️ Password Requirement Alert:\n\nOnly alphanumeric password is required to set the password!\n\n• Must contain letters and numbers (e.g., Explorer2026)\n• Minimum 6 characters.'
+            '⚠️ Password Not Acceptable!\n\nOnly alphanumeric passwords are required to register an account.\n\n• Must contain letters and numbers (e.g., Explorer2026)\n• Minimum 6 characters.'
           );
         }
         return;
       }
 
-      // Check if user/email already exists
+      // 2. ONLY AFTER PASSWORD IS VALID: Check if username/email already exists
       const existingUsers = getStoredRegisteredUsers();
       const duplicate =
         USERS_DATABASE.find(
@@ -648,11 +636,17 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess, onExploreAsGuest })
               {activeTab === 'register' && (
                 <div className="mt-2.5 p-2.5 rounded-xl bg-stone-950/60 border border-stone-800 space-y-1.5">
                   <div className="flex items-center justify-between text-[10px]">
-                    <span className="text-stone-400 font-medium">Password Requirements:</span>
-                    {pwdValidation.isOnlyDigits && (
-                      <span className="text-amber-400 font-medium flex items-center gap-1">
+                    <span className="text-stone-400 font-medium">Password Policy:</span>
+                    {password.length > 0 && !pwdValidation.isValid && (
+                      <span className="text-rose-400 font-bold flex items-center gap-1">
                         <AlertTriangle className="w-3 h-3" />
-                        <span>Must include letters too</span>
+                        <span>Password not acceptable</span>
+                      </span>
+                    )}
+                    {password.length > 0 && pwdValidation.isValid && (
+                      <span className="text-emerald-400 font-bold flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3" />
+                        <span>Password acceptable</span>
                       </span>
                     )}
                   </div>
