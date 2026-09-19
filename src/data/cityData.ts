@@ -65,7 +65,7 @@ export const CITY_DATA: CityData[] = [
     tagline: 'The Soul of Punjab — Land of the Golden Temple & Living Traditions',
     description:
       'Amritsar, founded in 1577 by Guru Ram Das Ji, is the spiritual and cultural heartbeat of the Sikh faith and Punjabi heritage. Home to the magnificent Harmandir Sahib (Golden Temple), this city blends ancient spirituality with the most vibrant food streets, folk arts, and embroidery traditions in South Asia.',
-    heroImage: 'https://upload.wikimedia.org/wikipedia/commons/7/77/Elderly_Sikh_Man_outside_Mata_Temple_-_Amritsar_-_Punjab_-_India_%2812698154594%29.jpg',
+    heroImage: '/images/amritsar-hero.png',
     coords: { x: 30, y: 25 },
     category: 'Sacred Heritage',
     population: '1.3 Million',
