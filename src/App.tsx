@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { lazy, Suspense, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Heritage Alive & Smarak AI Components
@@ -19,16 +19,23 @@ import { GlobalSearchModal } from './components/heritage/GlobalSearchModal';
 import { Footer } from './components/heritage/Footer';
 import { LoginPage } from './components/heritage/LoginPage';
 import { AdminDashboard } from './components/heritage/AdminDashboard';
-import { ModelViewerWebXR } from './components/ModelViewerWebXR';
-import { CameraARViewer } from './components/CameraARViewer';
+import { GlobalHeritageBackground } from './components/heritage/GlobalHeritageBackground';
+const ModelViewerWebXR = lazy(() => import('./components/ModelViewerWebXR').then((module) => ({ default: module.ModelViewerWebXR })));
+const CameraARViewer = lazy(() => import('./components/CameraARViewer').then((module) => ({ default: module.CameraARViewer })));
 import { MONUMENTS } from './data/monuments';
 import type { Monument } from './types';
 
 import { useLanguage } from './i18n/LanguageContext';
 
 export function App() {
-  const [activePage, setActivePage] = useState<string>('home');
   const [activeCityId, setActiveCityId] = useState<string>('amritsar');
+  const routeFromLocation = () => {
+    const params = new URLSearchParams(window.location.search);
+    const city = params.get('city');
+    if (city) setActiveCityId(city);
+    return params.get('page') || (window.location.pathname === '/login' ? 'login' : 'home');
+  };
+  const [activePage, setActivePage] = useState<string>(routeFromLocation);
   const { language: selectedLang, setLanguage: setSelectedLang } = useLanguage();
   const [activeArMonument, setActiveArMonument] = useState<Monument | null>(null);
   const [arViewerMode, setArViewerMode] = useState<'webxr' | 'camera'>('webxr');
@@ -50,24 +57,41 @@ export function App() {
       setActiveArMonument(found);
       setArViewerMode('webxr');
     }
+    const handlePopState = () => setActivePage(routeFromLocation());
+    const handleCitySelect = (event: Event) => {
+      const cityId = (event as CustomEvent<string>).detail;
+      if (cityId) {
+        setActiveCityId(cityId);
+        setActivePage('city');
+        window.history.pushState({ page: 'city', cityId }, '', `?page=city&city=${encodeURIComponent(cityId)}`);
+      }
+    };
+    const handleNavigateEvent = (event: Event) => {
+      const page = (event as CustomEvent<string>).detail;
+      if (page) handleNavigate(page);
+    };
+    window.addEventListener('popstate', handlePopState);
+    window.addEventListener('select-city', handleCitySelect);
+    window.addEventListener('navigate-to-page', handleNavigateEvent);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('select-city', handleCitySelect);
+      window.removeEventListener('navigate-to-page', handleNavigateEvent);
+    };
   }, []);
 
   // Handle page scrolling and URL update on navigation
   const handleNavigate = (page: string) => {
     setActivePage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    if (page === 'login') {
-      window.history.pushState({}, '', '?page=login');
-    } else if (page === 'home') {
-      window.history.pushState({}, '', window.location.pathname === '/login' ? '/' : window.location.pathname);
-    } else {
-      window.history.pushState({}, '', `?page=${page}`);
-    }
+    const url = page === 'home' ? '/' : `?page=${encodeURIComponent(page)}`;
+    window.history.pushState({ page }, '', url);
   };
 
   const handleSelectCity = (cityId: string) => {
     setActiveCityId(cityId);
     setActivePage('city');
+    window.history.pushState({ page: 'city', cityId }, '', `?page=city&city=${encodeURIComponent(cityId)}`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -105,7 +129,12 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-[#0e1017] text-stone-100 selection:bg-amber-500 selection:text-stone-950 font-outfit relative pb-20 md:pb-0 overflow-x-hidden">
+      <GlobalHeritageBackground />
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:z-[100] focus:top-3 focus:left-3 focus:bg-amber-500 focus:px-4 focus:py-2 focus:text-black focus:rounded-lg">
+        Skip to content
+      </a>
       {/* 1. Sticky Navigation Bar */}
+      <div className="relative z-10">
       <Navbar
         activePage={activePage}
         onNavigate={handleNavigate}
@@ -116,7 +145,7 @@ export function App() {
       />
 
       {/* 2. Dynamic Page Content Switcher with Framer Motion */}
-      <main className="pt-16">
+      <main id="main-content" tabIndex={-1} className="pt-16" aria-live="polite">
         <AnimatePresence mode="wait">
           <motion.div
             key={activePage}
@@ -164,6 +193,16 @@ export function App() {
                 onExploreAsGuest={() => handleNavigate('home')}
               />
             )}            {activePage === 'map' && <HeritageMap onCitySelect={handleSelectCity} />}
+            {!['home', 'discover', 'cities', 'city', 'vanishing', 'adopt', 'stories', 'community', 'profile', 'admin-dashboard', 'login', 'map'].includes(activePage) && (
+              <section className="min-h-[60vh] flex flex-col items-center justify-center px-6 text-center" aria-labelledby="not-found-title">
+                <p className="text-amber-400 uppercase tracking-[0.3em] text-sm mb-3">404</p>
+                <h1 id="not-found-title" className="text-3xl font-serif text-white mb-4">Page not found</h1>
+                <p className="text-stone-400 mb-6">The heritage route you requested does not exist.</p>
+                <button type="button" onClick={() => handleNavigate('home')} className="rounded-full bg-amber-500 px-5 py-3 font-semibold text-black hover:bg-amber-400">
+                  Return home
+                </button>
+              </section>
+            )}
           </motion.div>
         </AnimatePresence>
       </main>
@@ -173,31 +212,31 @@ export function App() {
 
       {/* 4. Mobile Bottom Sticky Nav */}
       <MobileNav activePage={activePage} onNavigate={handleNavigate} />
+      </div>
 
       {/* 5. Modals */}
       <PreserveStoryModal />
-      <GlobalSearchModal />
+      <GlobalSearchModal onNavigate={handleNavigate} />
 
       {/* 6. Deep-linked Mobile AR Viewer (from scanning QR code) */}
-      {activeArMonument && arViewerMode === 'webxr' && (
-        <ModelViewerWebXR
-          monument={activeArMonument}
-          onClose={() => setActiveArMonument(null)}
-          onSwitchToCameraAR={() => setArViewerMode('camera')}
-        />
-      )}
-      {activeArMonument && arViewerMode === 'camera' && (
-        <CameraARViewer
-          monument={activeArMonument}
-          onClose={() => setActiveArMonument(null)}
-          onOpenNativeAR={() => setArViewerMode('webxr')}
-        />
-      )}
+      <Suspense fallback={activeArMonument ? <div role="status" aria-live="polite" className="fixed inset-0 z-[90] grid place-items-center bg-black/80 text-amber-300">Loading AR experience…</div> : null}>
+        {activeArMonument && arViewerMode === 'webxr' && (
+          <ModelViewerWebXR
+            monument={activeArMonument}
+            onClose={() => setActiveArMonument(null)}
+            onSwitchToCameraAR={() => setArViewerMode('camera')}
+          />
+        )}
+        {activeArMonument && arViewerMode === 'camera' && (
+          <CameraARViewer
+            monument={activeArMonument}
+            onClose={() => setActiveArMonument(null)}
+            onOpenNativeAR={() => setArViewerMode('webxr')}
+          />
+        )}
+      </Suspense>
     </div>
   );
 }
 
 export default App;
-
-
-

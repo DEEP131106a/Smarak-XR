@@ -1,5 +1,6 @@
 import type { UserProfile, StoryItem } from '../types/heritageAlive';
-import { PRESERVED_STORIES } from '../data/heritageAliveData';
+import { clearAuthToken } from './apiService';
+import { apiService } from './apiService';
 
 const INITIAL_PROFILE: UserProfile = {
   name: 'Sourav Preet',
@@ -22,7 +23,6 @@ const INITIAL_PROFILE: UserProfile = {
 };
 
 const STORAGE_PROFILE_KEY = 'heritage_alive_profile';
-const STORAGE_STORIES_KEY = 'heritage_alive_user_stories';
 const STORAGE_AUTH_KEY = 'smarak_user';
 
 type Listener = () => void;
@@ -109,6 +109,7 @@ export function loginUser(
 }
 
 export function logoutUser(): void {
+  clearAuthToken();
   try {
     localStorage.removeItem(STORAGE_AUTH_KEY);
     const current = getUserProfile();
@@ -160,60 +161,33 @@ export function toggleAdoptHeritage(itemId: string): boolean {
   };
 
   saveUserProfile(updated);
+  void (isAdopted ? apiService.deleteAdoption(itemId) : apiService.adopt(itemId)).catch(console.error);
   return !isAdopted;
 }
 
-export function getUserStories(): StoryItem[] {
-  let userStories: StoryItem[] = [];
-  try {
-    const saved = localStorage.getItem(STORAGE_STORIES_KEY);
-    if (saved) userStories = JSON.parse(saved);
-  } catch {
-    userStories = [];
-  }
-  return [...userStories, ...PRESERVED_STORIES];
+export async function fetchUserStories(): Promise<StoryItem[]> {
+  const response = await apiService.getMyStories() as { stories?: StoryItem[] };
+  return response.stories || [];
 }
 
-export function addUserStory(story: StoryItem): void {
-  let existing: StoryItem[] = [];
-  try {
-    const saved = localStorage.getItem(STORAGE_STORIES_KEY);
-    if (saved) existing = JSON.parse(saved);
-  } catch {
-    existing = [];
-  }
-  const updatedList = [story, ...existing];
-  try {
-    localStorage.setItem(STORAGE_STORIES_KEY, JSON.stringify(updatedList));
-  } catch {
-    // ignore
-  }
-
-  const profile = getUserProfile();
-  const updatedProfile: UserProfile = {
-    ...profile,
-    storiesPreserved: profile.storiesPreserved + 1,
-  };
-  saveUserProfile(updatedProfile);
-  addPoints(50, 'Preserved a Story');
+export async function fetchPublicStories(): Promise<StoryItem[]> {
+  return apiService.getPublicStories() as Promise<StoryItem[]>;
 }
-export function updateUserStoryStatus(storyId: string, status: 'verified' | 'rejected'): void {
-  let existing: StoryItem[] = [];
-  try {
-    const saved = localStorage.getItem(STORAGE_STORIES_KEY);
-    if (saved) existing = JSON.parse(saved);
-  } catch {
-    return;
-  }
-  
-  const updatedList = existing.map(story => 
-    story.id === storyId ? { ...story, status } : story
-  );
-  
-  try {
-    localStorage.setItem(STORAGE_STORIES_KEY, JSON.stringify(updatedList));
-  } catch {
-    // ignore
-  }
-  notify();
+
+export async function submitUserStory(story: StoryItem): Promise<StoryItem> {
+  const response = await apiService.createStory({
+    title: story.title,
+    category: story.category,
+    region: story.region,
+    state: story.state,
+    preservedBy: story.preservedBy,
+    shortStory: story.shortStory,
+    fullStory: story.fullStory,
+    mediaType: story.mediaType,
+    image: story.image,
+    audioUrl: story.audioUrl,
+    videoUrl: story.videoUrl,
+    recipeIngredients: story.recipeIngredients,
+  }) as { story?: StoryItem };
+  return response.story || story;
 }

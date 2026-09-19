@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 // @ts-ignore
 import { MONUMENTS } from '../../src/data/monuments';
 // @ts-ignore
@@ -40,7 +41,13 @@ async function main() {
   for (const m of MONUMENTS as any[]) {
     await prisma.monument.upsert({
       where: { id: m.id },
-      update: {},
+      update: {
+        name: m.name, hindiName: m.hindiName, location: m.location, state: m.state,
+        region: m.region, period: m.period, dynasty: m.dynasty, unesco: m.unesco,
+        builtYear: m.builtYear, tagline: m.tagline, shortDescription: m.shortDescription,
+        fullHistory: m.fullHistory, architecturalStyle: m.architecturalStyle,
+        modelType: m.modelType, accentColor: m.accentColor, lat: m.coordinates.lat, lng: m.coordinates.lng,
+      },
       create: {
         id: m.id,
         name: m.name,
@@ -113,15 +120,19 @@ async function main() {
 
     if (m.timeline) {
       for (const t of m.timeline) {
-        await prisma.historicalEra.create({
-          data: {
+        await prisma.historicalEra.upsert({
+          where: { monumentId_year_eraName: { monumentId: m.id, year: t.year, eraName: t.eraName } },
+          update: {
+            description: t.description, reconstructedCondition: t.reconstructedCondition, ruler: t.ruler,
+          },
+          create: {
             year: t.year,
             eraName: t.eraName,
             description: t.description,
             reconstructedCondition: t.reconstructedCondition,
             ruler: t.ruler,
             monumentId: m.id,
-          }
+          },
         });
       }
     }
@@ -268,6 +279,36 @@ async function main() {
         hindiName: item.hindiName,
         description: item.description,
       }
+    });
+  }
+
+  const seedUsers = process.env.ADMIN_SEED_USERS
+    ? JSON.parse(process.env.ADMIN_SEED_USERS) as Array<{
+        username: string; email: string; name: string; password: string; role?: string;
+          specialization?: string;
+      }>
+    : [];
+  for (const user of seedUsers) {
+    if (!user.username || !user.email || !user.name || !user.password) {
+      throw new Error('Each ADMIN_SEED_USERS entry requires username, email, name, and password');
+    }
+    await prisma.user.upsert({
+      where: { username: user.username.toLowerCase() },
+      update: {
+        email: user.email.toLowerCase(),
+        name: user.name,
+        role: user.role || 'ADMIN',
+        specialization: user.specialization || 'Explorer',
+        passwordHash: await bcrypt.hash(user.password, 12),
+      },
+      create: {
+        username: user.username.toLowerCase(),
+        email: user.email.toLowerCase(),
+        name: user.name,
+        role: user.role || 'ADMIN',
+        specialization: user.specialization || 'Explorer',
+        passwordHash: await bcrypt.hash(user.password, 12),
+      },
     });
   }
 

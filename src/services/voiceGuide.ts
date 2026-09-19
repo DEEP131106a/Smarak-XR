@@ -50,28 +50,33 @@ class VoiceGuideService {
 
     this.stop();
 
-    this.currentText = text;
+    const cleanText = text.replace(/\s+/g, ' ').trim();
+    this.currentText = cleanText;
     this.currentLang = lang;
-    this.currentUtterance = new SpeechSynthesisUtterance(text);
+    this.currentUtterance = new SpeechSynthesisUtterance(cleanText);
 
     // Pick best available voice for language
     const voices = this.synth.getVoices();
     if (lang === 'hi') {
       this.currentUtterance.lang = 'hi-IN';
-      const hiVoice = voices.find((v) => v.lang.includes('hi') || v.lang.includes('Hindi'));
+      const hiVoice = voices.find((v) => v.lang.toLowerCase() === 'hi-in') ||
+        voices.find((v) => v.lang.toLowerCase().startsWith('hi')) ||
+        voices.find((v) => v.name.toLowerCase().includes('hindi'));
       if (hiVoice) this.currentUtterance.voice = hiVoice;
-      this.currentUtterance.rate = 0.95;
+      this.currentUtterance.rate = 0.86;
     } else {
       this.currentUtterance.lang = 'en-IN';
       const inVoice =
-        voices.find((v) => v.lang === 'en-IN') ||
-        voices.find((v) => v.lang.startsWith('en')) ||
+        voices.find((v) => v.lang.toLowerCase() === 'en-in') ||
+        voices.find((v) => v.lang.toLowerCase().startsWith('en-in')) ||
+        voices.find((v) => v.lang.toLowerCase().startsWith('en')) ||
         null;
       if (inVoice) this.currentUtterance.voice = inVoice;
-      this.currentUtterance.rate = 0.98;
+      this.currentUtterance.rate = 0.88;
     }
 
-    this.currentUtterance.pitch = 1.0;
+    this.currentUtterance.pitch = 0.96;
+    this.currentUtterance.volume = 1;
 
     this.currentUtterance.onstart = () => {
       this.isPlaying = true;

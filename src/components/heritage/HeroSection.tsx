@@ -28,9 +28,9 @@ export const HeroSection: React.FC<Props> = ({
 }) => {
   const { t } = useLanguage();
   return (
-    <section className="relative w-full min-h-[92vh] flex flex-col items-center justify-center text-center px-4 sm:px-6 lg:px-8 pt-24 pb-16 overflow-hidden bg-[#0e1017]">
+    <section className="relative w-full min-h-[92vh] flex flex-col items-center justify-center text-center px-4 sm:px-6 lg:px-8 pt-24 pb-16 overflow-hidden bg-transparent">
       {/* Background Decorative Mandala Rings & Radial Glow */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+      <div className="absolute inset-0 z-[1] flex items-center justify-center pointer-events-none">
         <div className="w-[600px] h-[600px] sm:w-[900px] sm:h-[900px] rounded-full border border-[#d4af37]/10 animate-spin-slow" />
         <div className="absolute w-[450px] h-[450px] sm:w-[680px] sm:h-[680px] rounded-full border border-[#c85a32]/15 animate-spin-reverse-slow" />
         <div className="absolute w-[300px] h-[300px] sm:w-[480px] sm:h-[480px] rounded-full border border-[#d4af37]/20" />

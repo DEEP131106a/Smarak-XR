@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ShieldAlert, CheckCircle, XCircle, Clock, MapPin, Tag, User } from 'lucide-react';
-import { getUserStories, updateUserStoryStatus } from '../../services/heritageStateService';
+import { apiService } from '../../services/apiService';
 import type { StoryItem } from '../../types/heritageAlive';
 import { triggerHaptic } from '../../utils/haptics';
 
@@ -10,15 +10,18 @@ export const AdminDashboard: React.FC = () => {
 
   useEffect(() => {
     // Initial fetch
-    setStories(getUserStories().filter(s => s.status === 'pending'));
+    void apiService.getModerationStories().then((data: { stories: StoryItem[] }) => {
+      setStories(data.stories);
+    }).catch(console.error);
 
     // Setup an interval or manual refresh if needed, but since we modify local state we'll just update state directly
   }, []);
 
   const handleAction = (storyId: string, action: 'verified' | 'rejected') => {
     triggerHaptic('success');
-    updateUserStoryStatus(storyId, action);
-    setStories((prev) => prev.filter((s) => s.id !== storyId));
+    void apiService.moderateStory(storyId, action === 'verified' ? 'APPROVED' : 'REJECTED')
+      .then(() => setStories((prev) => prev.filter((s) => s.id !== storyId)))
+      .catch(console.error);
   };
 
   return (

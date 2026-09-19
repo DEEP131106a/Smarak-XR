@@ -10,6 +10,8 @@ class HeritageSoundEngine {
   private isDronePlaying: boolean = false;
   private droneGain: GainNode | null = null;
   private droneOscillators: OscillatorNode[] = [];
+  private melodyTimer: number | null = null;
+  private melodyStep = 0;
 
   private initContext() {
     if (!this.ctx) {
@@ -65,8 +67,68 @@ class HeritageSoundEngine {
     });
   }
 
+  private playMelodyNote(frequency: number, duration = 2.6) {
+    if (!this.ctx || !this.droneGain || this.isMuted) return;
+    const now = this.ctx.currentTime;
+    const oscillator = this.ctx.createOscillator();
+    const secondHarmonic = this.ctx.createOscillator();
+    const vibrato = this.ctx.createOscillator();
+    const vibratoGain = this.ctx.createGain();
+    const filter = this.ctx.createBiquadFilter();
+    const noteGain = this.ctx.createGain();
+    const breath = this.ctx.createBufferSource();
+    const breathFilter = this.ctx.createBiquadFilter();
+    const breathGain = this.ctx.createGain();
+    const breathBuffer = this.ctx.createBuffer(1, this.ctx.sampleRate * duration, this.ctx.sampleRate);
+    const breathData = breathBuffer.getChannelData(0);
+    for (let index = 0; index < breathData.length; index += 1) {
+      breathData[index] = (Math.random() * 2 - 1) * 0.16;
+    }
+
+    oscillator.type = 'triangle';
+    oscillator.frequency.setValueAtTime(frequency, now);
+    secondHarmonic.type = 'sine';
+    secondHarmonic.frequency.setValueAtTime(frequency * 2, now);
+    vibrato.frequency.setValueAtTime(5.2, now);
+    vibratoGain.gain.setValueAtTime(2.8, now);
+    vibrato.connect(vibratoGain);
+    vibratoGain.connect(oscillator.detune);
+    vibratoGain.connect(secondHarmonic.detune);
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(1250, now);
+    filter.Q.setValueAtTime(0.45, now);
+    noteGain.gain.setValueAtTime(0.0001, now);
+    noteGain.gain.linearRampToValueAtTime(0.027, now + 0.4);
+    noteGain.gain.setValueAtTime(0.027, now + duration * 0.52);
+    noteGain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+    breath.buffer = breathBuffer;
+    breath.loop = false;
+    breathFilter.type = 'bandpass';
+    breathFilter.frequency.setValueAtTime(1900, now);
+    breathFilter.Q.setValueAtTime(0.6, now);
+    breathGain.gain.setValueAtTime(0.0001, now);
+    breathGain.gain.linearRampToValueAtTime(0.012, now + 0.22);
+    breathGain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+    oscillator.connect(filter);
+    secondHarmonic.connect(filter);
+    filter.connect(noteGain);
+    noteGain.connect(this.droneGain);
+    breath.connect(breathFilter);
+    breathFilter.connect(breathGain);
+    breathGain.connect(this.droneGain);
+    oscillator.start(now);
+    secondHarmonic.start(now);
+    vibrato.start(now);
+    breath.start(now);
+    oscillator.stop(now + duration + 0.1);
+    secondHarmonic.stop(now + duration + 0.1);
+    vibrato.stop(now + duration + 0.1);
+  }
+
   /**
-   * Starts an ambient Indian Tanpura drone in C (Sa - Pa - Sa' - Sa)
+   * Starts a soft bansuri-inspired instrumental phrase over a quiet pad.
    */
   public startTanpuraDrone() {
     if (this.isDronePlaying) return;
@@ -77,19 +139,12 @@ class HeritageSoundEngine {
     const master = this.ctx.createGain();
     master.connect(this.ctx.destination);
     master.gain.setValueAtTime(0.001, now);
-    master.gain.linearRampToValueAtTime(this.isMuted ? 0 : 0.09, now + 2.0);
+    master.gain.linearRampToValueAtTime(this.isMuted ? 0 : 0.045, now + 2.0);
     this.droneGain = master;
 
-    // Tanpura string frequencies based on C3 (130.81 Hz):
-    // String 1: Pa (G3 - 196 Hz)
-    // String 2: Sa' (C4 - 261.63 Hz)
-    // String 3: Sa' (C4 - 261.63 Hz slightly detuned)
-    // String 4: Kharaj Sa (C3 - 130.81 Hz)
     const strings = [
-      { freq: 196.0, detune: 2 },
-      { freq: 261.63, detune: -4 },
-      { freq: 261.63, detune: 5 },
       { freq: 130.81, detune: 0 },
+      { freq: 196.0, detune: 2 },
     ];
 
     this.droneOscillators = [];
@@ -99,14 +154,14 @@ class HeritageSoundEngine {
       const osc = this.ctx.createOscillator();
       const filter = this.ctx.createBiquadFilter();
 
-      osc.type = 'sawtooth';
+      osc.type = 'sine';
       osc.frequency.setValueAtTime(s.freq, now);
       osc.detune.setValueAtTime(s.detune, now);
 
       // Low pass filter to warm the acoustic timbre
       filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(420, now);
-      filter.Q.setValueAtTime(3.0, now);
+      filter.frequency.setValueAtTime(240, now);
+      filter.Q.setValueAtTime(0.7, now);
 
       // Gentle LFO tremolo for the vibrating silk thread (Javari) effect
       const lfo = this.ctx.createOscillator();
@@ -125,12 +180,23 @@ class HeritageSoundEngine {
     });
 
     this.isDronePlaying = true;
+    const melody = [261.63, 293.66, 329.63, 392, 440, 392, 329.63, 293.66];
+    this.melodyStep = 0;
+    this.playMelodyNote(melody[0]);
+    this.melodyTimer = window.setInterval(() => {
+      this.playMelodyNote(melody[this.melodyStep % melody.length]);
+      this.melodyStep += 1;
+    }, 2800);
   }
 
   public stopTanpuraDrone() {
     if (!this.isDronePlaying || !this.droneGain || !this.ctx) return;
     const now = this.ctx.currentTime;
     this.droneGain.gain.linearRampToValueAtTime(0.0001, now + 1.2);
+    if (this.melodyTimer !== null) {
+      window.clearInterval(this.melodyTimer);
+      this.melodyTimer = null;
+    }
     setTimeout(() => {
       this.droneOscillators.forEach((osc) => {
         try {
@@ -158,7 +224,7 @@ class HeritageSoundEngine {
   public toggleMute(): boolean {
     this.isMuted = !this.isMuted;
     if (this.droneGain && this.ctx) {
-      this.droneGain.gain.setValueAtTime(this.isMuted ? 0 : 0.09, this.ctx.currentTime);
+      this.droneGain.gain.setValueAtTime(this.isMuted ? 0 : 0.045, this.ctx.currentTime);
     }
     return this.isMuted;
   }
