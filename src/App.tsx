@@ -42,6 +42,10 @@ export function App() {
 
   // Handle URL deep-link parameters (e.g. from QR code scan on mobile, or ?page=login)
   useEffect(() => {
+    // CLEANUP LEGACY DB (v1 Prototype)
+    const legacyKeys = ['smarak_users_db', 'smarak_registered_users', 'heritage_alive_user_stories', 'heritage_alive_profile'];
+    legacyKeys.forEach(k => localStorage.removeItem(k));
+
     const params = new URLSearchParams(window.location.search);
     const arId = params.get('ar');
     const pageParam = params.get('page');
@@ -240,3 +244,4 @@ export function App() {
 }
 
 export default App;
+
