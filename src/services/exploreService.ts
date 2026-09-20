@@ -3,36 +3,27 @@ import type {
   CityItem,
   ExploreFilter,
 } from '../types/explore';
-import { STATES_DATA } from '../data/explore/statesData';
-import { CITIES_DATA } from '../data/explore/citiesData';
+import { apiService } from './apiService';
 
 /**
  * Service function to retrieve all states
  */
 export async function getExploreStates(): Promise<StateItem[]> {
-  await new Promise((resolve) => setTimeout(resolve, 80));
-  return STATES_DATA;
+  return apiService.getExploreStates();
 }
 
 /**
  * Service function to retrieve a specific state by ID
  */
 export async function getExploreState(stateId: string): Promise<StateItem | null> {
-  await new Promise((resolve) => setTimeout(resolve, 50));
-  const found = STATES_DATA.find(
-    (s) => s.id.toLowerCase() === stateId.toLowerCase()
-  );
-  return found || null;
+  return apiService.getExploreState(stateId);
 }
 
 /**
  * Service function to retrieve cities belonging to a state
  */
 export async function getExploreCities(stateId: string): Promise<CityItem[]> {
-  await new Promise((resolve) => setTimeout(resolve, 80));
-  return CITIES_DATA.filter(
-    (c) => c.stateId.toLowerCase() === stateId.toLowerCase()
-  );
+  return apiService.getExploreCities(stateId);
 }
 
 /**
@@ -42,13 +33,8 @@ export async function getExploreCity(
   stateId: string,
   cityId: string
 ): Promise<CityItem | null> {
-  await new Promise((resolve) => setTimeout(resolve, 50));
-  const found = CITIES_DATA.find(
-    (c) =>
-      c.stateId.toLowerCase() === stateId.toLowerCase() &&
-      c.id.toLowerCase() === cityId.toLowerCase()
-  );
-  return found || null;
+  const city = await apiService.getExploreCity(cityId);
+  return city.stateId.toLowerCase() === stateId.toLowerCase() ? city : null;
 }
 
 /**
@@ -58,10 +44,12 @@ export async function searchExplore(filter: ExploreFilter): Promise<{
   states: StateItem[];
   cities: CityItem[];
 }> {
-  await new Promise((resolve) => setTimeout(resolve, 100));
-
-  let matchedStates = [...STATES_DATA];
-  let matchedCities = [...CITIES_DATA];
+  const [allStates, allCities] = await Promise.all([
+    apiService.getExploreStates() as Promise<StateItem[]>,
+    apiService.getAllExploreCities() as Promise<CityItem[]>,
+  ]);
+  let matchedStates = [...allStates];
+  let matchedCities = [...allCities];
 
   if (filter.stateId && filter.stateId !== 'all') {
     matchedStates = matchedStates.filter((s) => s.id === filter.stateId);

@@ -2,7 +2,7 @@ import React from 'react';
 
 export const LoadingState: React.FC = () => {
   return (
-    <div className="w-full py-8">
+    <div className="w-full py-8" role="status" aria-live="polite" aria-label="Loading content">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
         {[1, 2, 3, 4, 5, 6].map((idx) => (
           <div

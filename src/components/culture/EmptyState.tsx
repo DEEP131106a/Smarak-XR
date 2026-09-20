@@ -96,7 +96,7 @@ export const EmptyState: React.FC<Props> = ({
   const Icon = config.icon;
 
   return (
-    <div className="w-full max-w-2xl mx-auto my-10 p-8 sm:p-12 rounded-3xl glass-royal border border-amber-500/20 text-center flex flex-col items-center justify-center shadow-2xl">
+    <div className="w-full max-w-2xl mx-auto my-10 p-8 sm:p-12 rounded-3xl glass-royal border border-amber-500/20 text-center flex flex-col items-center justify-center shadow-2xl" role="status">
       {/* Icon Badge */}
       <div className="w-20 h-20 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mb-6 shadow-lg text-amber-400">
         <Icon className="w-10 h-10 animate-pulse" />

@@ -2,11 +2,15 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Award, Users, Trophy, Target, Sparkles, CheckCircle2, ArrowRight } from 'lucide-react';
 import { COMMUNITY_CONTRIBUTORS, COMMUNITY_CHALLENGES } from '../../data/heritageAliveData';
-import { getUserStories, addPoints } from '../../services/heritageStateService';
+import { fetchPublicStories, addPoints } from '../../services/heritageStateService';
+import type { StoryItem } from '../../types/heritageAlive';
 
 export const CommunityPage: React.FC = () => {
   const [challenges, setChallenges] = useState(COMMUNITY_CHALLENGES);
-  const userStories = getUserStories();
+  const [userStories, setUserStories] = useState<StoryItem[]>([]);
+  React.useEffect(() => {
+    void fetchPublicStories().then(setUserStories).catch(console.error);
+  }, []);
 
   const handleCompleteChallenge = (id: string, pts: number) => {
     setChallenges((prev) =>

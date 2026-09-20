@@ -8,7 +8,8 @@ export type CategoryType =
   | 'Dance'
   | 'Festival'
   | 'Site'
-  | 'Tradition';
+  | 'Tradition'
+  | 'Other';
 
 export type HeritageItem = {
   id: string;
@@ -82,7 +83,6 @@ export type StoryItem = {
   region: string;
   state: string;
   preservedBy: string;
-  authorId?: string;
   date: string;
   shortStory: string;
   fullStory?: string;
@@ -155,6 +155,4 @@ export type MapPinLocation = {
   category: string;
   hindiName?: string;
 };
-
-
 

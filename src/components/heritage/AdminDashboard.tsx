@@ -1,27 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ShieldAlert, CheckCircle, XCircle, Clock, MapPin, Tag, User, Trash2 } from 'lucide-react';
-import { getUserStories, updateUserStoryStatus } from '../../services/heritageStateService';
+import { ShieldAlert, CheckCircle, XCircle, Clock, MapPin, Tag, User } from 'lucide-react';
+import { apiService } from '../../services/apiService';
 import type { StoryItem } from '../../types/heritageAlive';
 import { triggerHaptic } from '../../utils/haptics';
 
 export const AdminDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'pending' | 'verified'>('pending');
   const [stories, setStories] = useState<StoryItem[]>([]);
 
-  const fetchStories = () => {
-    const allStories = getUserStories();
-    setStories(allStories.filter(s => s.status === activeTab));
-  };
-
   useEffect(() => {
-    fetchStories();
-  }, [activeTab]);
+    // Initial fetch
+    void apiService.getModerationStories().then((data: { stories: StoryItem[] }) => {
+      setStories(data.stories);
+    }).catch(console.error);
+
+    // Setup an interval or manual refresh if needed, but since we modify local state we'll just update state directly
+  }, []);
 
   const handleAction = (storyId: string, action: 'verified' | 'rejected') => {
     triggerHaptic('success');
-    updateUserStoryStatus(storyId, action);
-    setStories((prev) => prev.filter((s) => s.id !== storyId));
+    void apiService.moderateStory(storyId, action === 'verified' ? 'APPROVED' : 'REJECTED')
+      .then(() => setStories((prev) => prev.filter((s) => s.id !== storyId)))
+      .catch(console.error);
   };
 
   return (
@@ -32,41 +32,18 @@ export const AdminDashboard: React.FC = () => {
           <span>Admin Moderation</span>
         </div>
         <h1 className="text-4xl sm:text-5xl font-extrabold text-stone-100 tracking-tight mb-4">
-          Control <span className="heritage-gold-text">Center</span>
+          Verification <span className="heritage-gold-text">Queue</span>
         </h1>
         <p className="text-lg text-stone-400">
-          Review pending submissions or manage verified community stories.
+          Review community submissions before they go live on the platform.
         </p>
-      </div>
-
-      <div className="flex justify-center gap-4 mb-8">
-        <button
-          onClick={() => setActiveTab('pending')}
-          className={`px-6 py-2.5 rounded-xl font-bold transition-all ${
-            activeTab === 'pending'
-              ? 'bg-amber-500 text-stone-900 shadow-lg shadow-amber-500/25'
-              : 'bg-stone-900 border border-stone-800 text-stone-400 hover:text-stone-200'
-          }`}
-        >
-          Pending Queue
-        </button>
-        <button
-          onClick={() => setActiveTab('verified')}
-          className={`px-6 py-2.5 rounded-xl font-bold transition-all ${
-            activeTab === 'verified'
-              ? 'bg-amber-500 text-stone-900 shadow-lg shadow-amber-500/25'
-              : 'bg-stone-900 border border-stone-800 text-stone-400 hover:text-stone-200'
-          }`}
-        >
-          Published Archives
-        </button>
       </div>
 
       {stories.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-stone-500">
           <CheckCircle className="w-16 h-16 mb-4 opacity-50" />
           <h3 className="text-xl font-bold">Queue is Empty</h3>
-          <p>{activeTab === 'pending' ? 'All community submissions have been reviewed.' : 'No published stories found.'}</p>
+          <p>All community submissions have been reviewed.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -77,15 +54,9 @@ export const AdminDashboard: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               className="bg-stone-900 border border-amber-500/30 rounded-2xl p-6 shadow-xl relative"
             >
-              {activeTab === 'pending' ? (
-                <div className="absolute top-4 right-4 bg-stone-800 text-stone-300 text-xs px-2.5 py-1 rounded-md flex items-center gap-1.5 border border-stone-700">
-                  <Clock className="w-3 h-3 text-amber-500" /> Pending Review
-                </div>
-              ) : (
-                <div className="absolute top-4 right-4 bg-emerald-500/10 text-emerald-400 text-xs px-2.5 py-1 rounded-md flex items-center gap-1.5 border border-emerald-500/30">
-                  <CheckCircle className="w-3 h-3 text-emerald-500" /> Verified & Live
-                </div>
-              )}
+              <div className="absolute top-4 right-4 bg-stone-800 text-stone-300 text-xs px-2.5 py-1 rounded-md flex items-center gap-1.5 border border-stone-700">
+                <Clock className="w-3 h-3 text-amber-500" /> Pending Review
+              </div>
               
               <h3 className="text-2xl font-bold text-stone-100 mb-2 pr-28">{story.title}</h3>
               
@@ -100,29 +71,18 @@ export const AdminDashboard: React.FC = () => {
               </div>
 
               <div className="flex items-center gap-4">
-                {activeTab === 'pending' ? (
-                  <>
-                    <button
-                      onClick={() => handleAction(story.id, 'verified')}
-                      className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-colors"
-                    >
-                      <CheckCircle className="w-5 h-5" /> Verify & Publish
-                    </button>
-                    <button
-                      onClick={() => handleAction(story.id, 'rejected')}
-                      className="flex-1 bg-rose-900/50 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/50 font-bold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-colors"
-                    >
-                      <XCircle className="w-5 h-5" /> Reject
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    onClick={() => handleAction(story.id, 'rejected')}
-                    className="w-full bg-rose-900/20 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/30 font-bold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-colors"
-                  >
-                    <Trash2 className="w-5 h-5" /> Remove from Platform
-                  </button>
-                )}
+                <button
+                  onClick={() => handleAction(story.id, 'verified')}
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-colors"
+                >
+                  <CheckCircle className="w-5 h-5" /> Verify & Publish
+                </button>
+                <button
+                  onClick={() => handleAction(story.id, 'rejected')}
+                  className="flex-1 bg-rose-900/50 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/50 font-bold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-colors"
+                >
+                  <XCircle className="w-5 h-5" /> Reject
+                </button>
               </div>
             </motion.div>
           ))}

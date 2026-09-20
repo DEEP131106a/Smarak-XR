@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BookOpen, User, Calendar, MapPin, Sparkles, Filter, X, ArrowRight, Award } from 'lucide-react';
-import { getUserStories, subscribeState } from '../../services/heritageStateService';
+import { fetchPublicStories, subscribeState } from '../../services/heritageStateService';
+import { apiService } from '../../services/apiService';
 import type { StoryItem } from '../../types/heritageAlive';
 
 export const StoriesPage: React.FC = () => {
-  const [stories, setStories] = useState<StoryItem[]>(getUserStories());
+  const [stories, setStories] = useState<StoryItem[]>([]);
   const [selectedFilter, setSelectedFilter] = useState<string>('All');
   const [activeStoryModal, setActiveStoryModal] = useState<StoryItem | null>(null);
+  const [reviewMessage, setReviewMessage] = useState('');
 
   useEffect(() => {
+    void fetchPublicStories().then(setStories).catch(console.error);
     const unsub = subscribeState(() => {
-      setStories(getUserStories());
+      void fetchPublicStories().then(setStories).catch(console.error);
     });
     return unsub;
   }, []);
@@ -163,6 +166,18 @@ export const StoriesPage: React.FC = () => {
                     </ul>
                   </div>
                 )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    void apiService.reviewStory(activeStoryModal.id)
+                      .then(() => setReviewMessage('Thanks! You earned 5 heritage points.'))
+                      .catch((error: Error) => setReviewMessage(error.message));
+                  }}
+                  className="rounded-xl border border-emerald-500/30 px-4 py-2 text-xs font-bold text-emerald-300"
+                >
+                  <Award className="inline w-4 h-4 mr-1" /> Review this story (+5 points)
+                </button>
+                {reviewMessage && <p role="status" className="text-xs text-amber-300">{reviewMessage}</p>}
               </div>
             </motion.div>
           </motion.div>
@@ -171,4 +186,3 @@ export const StoriesPage: React.FC = () => {
     </div>
   );
 };
-

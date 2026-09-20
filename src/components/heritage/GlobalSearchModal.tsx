@@ -1,17 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X, MapPin, Tag, ArrowRight } from 'lucide-react';
-import { HERITAGE_ITEMS, PRESERVED_STORIES, MAP_LOCATIONS } from '../../data/heritageAliveData';
+import { Search, X, ArrowRight } from 'lucide-react';
+import { HERITAGE_ITEMS, MAP_LOCATIONS } from '../../data/heritageAliveData';
+import { apiService } from '../../services/apiService';
 
-export const GlobalSearchModal: React.FC = () => {
+interface Props { onNavigate?: (page: string) => void; }
+
+export const GlobalSearchModal: React.FC<Props> = ({ onNavigate }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const [remoteItems, setRemoteItems] = useState<Array<{ id: string; title: string; category?: string; region?: string; state?: string }>>([]);
 
   useEffect(() => {
-    const handleOpen = () => setIsOpen(true);
+    const handleOpen = () => {
+      setQuery('');
+      setIsOpen(true);
+    };
     window.addEventListener('open-global-search', handleOpen);
     return () => window.removeEventListener('open-global-search', handleOpen);
   }, []);
+
+  useEffect(() => {
+    if (!isOpen || query.trim().length < 2) {
+      setRemoteItems([]);
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      void apiService.getCultureItems({ search: query.trim() })
+        .then((items) => setRemoteItems(items as typeof remoteItems))
+        .catch(() => setRemoteItems([]));
+    }, 250);
+    return () => window.clearTimeout(timer);
+  }, [isOpen, query]);
 
   if (!isOpen) return null;
 
@@ -71,7 +91,11 @@ export const GlobalSearchModal: React.FC = () => {
                       {matchedLocations.map((loc) => (
                         <div
                           key={loc.id}
-                          onClick={() => setIsOpen(false)}
+                          onClick={() => {
+                            setIsOpen(false);
+                            window.dispatchEvent(new CustomEvent('select-city', { detail: loc.id }));
+                            onNavigate?.('city');
+                          }}
                           className="p-3 rounded-xl bg-stone-900/80 border border-stone-800 hover:border-amber-500/40 flex justify-between items-center cursor-pointer transition-all"
                         >
                           <div>
@@ -110,6 +134,22 @@ export const GlobalSearchModal: React.FC = () => {
                       ))}
                     </div>
                   </div>
+                )}
+                {remoteItems.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-amber-400 mb-2">Database Culture Results</h4>
+                    <div className="space-y-2">
+                      {remoteItems.map((item) => (
+                        <button type="button" key={item.id} onClick={() => { setIsOpen(false); onNavigate?.('discover'); }} className="w-full text-left p-3 rounded-xl bg-stone-900/80 border border-stone-800 hover:border-amber-500/40 flex justify-between items-center">
+                          <span><strong className="text-stone-100 text-sm">{item.title}</strong><span className="block text-stone-400 text-xs">{item.category} · {item.region || item.state || 'India'}</span></span>
+                          <ArrowRight className="w-4 h-4 text-amber-400" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {matchedLocations.length === 0 && matchedItems.length === 0 && remoteItems.length === 0 && (
+                  <p className="text-center py-8 text-stone-500 text-sm">No results found. Try a state, city, food, dance, song, or craft.</p>
                 )}
               </>
             )}

@@ -17,49 +17,14 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { loginUser } from '../../services/heritageStateService';
+import { apiService } from '../../services/apiService';
 import { soundEngine } from '../../services/soundEngine';
 import { triggerHaptic } from '../../utils/haptics';
 import confetti from 'canvas-confetti';
-import USERS_DATABASE from '../../data/users.json';
 
 interface Props {
   onLoginSuccess: () => void;
   onExploreAsGuest?: () => void;
-}
-
-interface StoredUser {
-  id?: string;
-  name: string;
-  username?: string;
-  email: string;
-  password?: string;
-  uid?: string;
-  role: string;
-  level?: number;
-  points?: number;
-  avatar: string;
-  isAdmin?: boolean;
-}
-
-const REGISTERED_USERS_KEY = 'smarak_registered_users';
-
-function getStoredRegisteredUsers(): StoredUser[] {
-  try {
-    const data = localStorage.getItem(REGISTERED_USERS_KEY);
-    return data ? JSON.parse(data) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveRegisteredUser(newUser: StoredUser): void {
-  try {
-    const existing = getStoredRegisteredUsers();
-    existing.push(newUser);
-    localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify(existing));
-  } catch (err) {
-    console.warn('Could not persist registered user:', err);
-  }
 }
 
 const AVATAR_OPTIONS = [
@@ -70,6 +35,7 @@ const AVATAR_OPTIONS = [
 ];
 
 const ROLES = [
+  'Explorer',
   'Culture Guardian',
   'Heritage Custodian',
   'Temple Historian',
@@ -161,6 +127,8 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess, onExploreAsGuest })
   const [selectedRole, setSelectedRole] = useState<string>(ROLES[0]);
   const [selectedAvatar, setSelectedAvatar] = useState<string>(AVATAR_OPTIONS[0]);
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [usernameFocused, setUsernameFocused] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
   const [rememberMe, setRememberMe] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
@@ -209,53 +177,12 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess, onExploreAsGuest })
         return;
       }
 
-      // 2. ONLY AFTER PASSWORD IS VALID: Check if username/email already exists
-      const existingUsers = getStoredRegisteredUsers();
-      const duplicate =
-        USERS_DATABASE.find(
-          (u) =>
-            u.username.toLowerCase() === trimmedUser.toLowerCase() ||
-            u.email.toLowerCase() === trimmedEmail.toLowerCase()
-        ) ||
-        existingUsers.find(
-          (u) =>
-            (u.username && u.username.toLowerCase() === trimmedUser.toLowerCase()) ||
-            u.email.toLowerCase() === trimmedEmail.toLowerCase()
-        );
-
-      if (duplicate) {
-        setError('An account with this username or email already exists. Please sign in instead.');
-        triggerHaptic('heavy');
-        return;
-      }
-
-      // Register new regular user with alphanumeric credentials
       setIsSubmitting(true);
       triggerHaptic('tap');
-
-      const newUser: StoredUser = {
-        name: trimmedUser,
-        username: trimmedUser.toLowerCase().replace(/\s+/g, '_'),
-        email: trimmedEmail,
-        password: trimmedPass,
-        role: selectedRole,
-        avatar: selectedAvatar,
-        level: 1,
-        points: 100,
-        isAdmin: false,
-      };
-
-      saveRegisteredUser(newUser);
-
-      setTimeout(() => {
+      apiService.register(trimmedUser, trimmedEmail, trimmedUser, trimmedPass, selectedRole).then(({ user }) => {
         loginUser(
-          newUser.name,
-          newUser.email,
-          newUser.role,
-          newUser.avatar,
-          newUser.points,
-          newUser.level,
-          false // regular user
+          user.name, user.email, selectedRole, user.avatar || undefined,
+          user.points, user.level, user.isAdmin
         );
         soundEngine.playTempleBell(880, 2.5);
         triggerHaptic('success');
@@ -266,7 +193,11 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess, onExploreAsGuest })
           colors: ['#d4af37', '#c85a32', '#10b981'],
         });
         onLoginSuccess();
-      }, 350);
+      }).catch((err: Error) => {
+        setError(err.message);
+        setIsSubmitting(false);
+        triggerHaptic('heavy');
+      });
       return;
     }
 
@@ -277,38 +208,11 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess, onExploreAsGuest })
       return;
     }
 
-    // 1. Check if it is a built-in ADMIN account (UID credentials handled securely in backend)
-    const matchedAdmin = USERS_DATABASE.find(
-      (u) =>
-        u.username.toLowerCase() === trimmedUser.toLowerCase() ||
-        u.name.toLowerCase() === trimmedUser.toLowerCase() ||
-        u.email.toLowerCase() === trimmedUser.toLowerCase()
-    );
-
-    if (matchedAdmin) {
-      const valid =
-        trimmedPass === matchedAdmin.password ||
-        (matchedAdmin.uid && trimmedPass === matchedAdmin.uid);
-
-      if (!valid) {
-        setError('Incorrect username or password. Please try again.');
-        triggerHaptic('heavy');
-        return;
-      }
-
-      setIsSubmitting(true);
-      triggerHaptic('tap');
-
-      setTimeout(() => {
-        loginUser(
-          matchedAdmin.name,
-          matchedAdmin.email,
-          matchedAdmin.role,
-          matchedAdmin.avatar,
-          matchedAdmin.points,
-          matchedAdmin.level,
-          Boolean(matchedAdmin.isAdmin)
-        );
+    setIsSubmitting(true);
+    triggerHaptic('tap');
+    apiService.login(trimmedUser, trimmedPass).then(({ user }) => {
+        loginUser(user.name, user.email, user.role, user.avatar || undefined,
+          user.points, user.level, user.isAdmin);
 
         soundEngine.playTempleBell(880, 2.5);
         triggerHaptic('success');
@@ -321,58 +225,11 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess, onExploreAsGuest })
         });
 
         onLoginSuccess();
-      }, 350);
-      return;
-    }
-
-    // 2. Check registered users (alphanumeric credentials)
-    const registeredUsers = getStoredRegisteredUsers();
-    const matchedUser = registeredUsers.find(
-      (u) =>
-        (u.username && u.username.toLowerCase() === trimmedUser.toLowerCase()) ||
-        u.name.toLowerCase() === trimmedUser.toLowerCase() ||
-        u.email.toLowerCase() === trimmedUser.toLowerCase()
-    );
-
-    if (matchedUser) {
-      if (trimmedPass !== matchedUser.password) {
-        setError('Incorrect username or password. Please try again.');
-        triggerHaptic('heavy');
-        return;
-      }
-
-      setIsSubmitting(true);
-      triggerHaptic('tap');
-
-      setTimeout(() => {
-        loginUser(
-          matchedUser.name,
-          matchedUser.email,
-          matchedUser.role,
-          matchedUser.avatar,
-          matchedUser.points,
-          matchedUser.level,
-          false // Regular user
-        );
-
-        soundEngine.playTempleBell(880, 2.5);
-        triggerHaptic('success');
-
-        confetti({
-          particleCount: 65,
-          spread: 70,
-          origin: { y: 0.6 },
-          colors: ['#d4af37', '#c85a32', '#10b981'],
-        });
-
-        onLoginSuccess();
-      }, 350);
-      return;
-    }
-
-    // No user found
-    setError('Account not found. Please verify your credentials or register an account.');
-    triggerHaptic('heavy');
+    }).catch((err: Error) => {
+      setError(err.message);
+      setIsSubmitting(false);
+      triggerHaptic('heavy');
+    });
   };
 
   const handleGuestLogin = () => {
@@ -391,14 +248,8 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess, onExploreAsGuest })
   };
 
   const handleGoogleLogin = () => {
-    triggerHaptic('tap');
-    soundEngine.playTempleBell(784, 1.8);
-    setIsSubmitting(true);
-
-    setTimeout(() => {
-      loginUser('Explorer', 'explorer@gmail.com', 'Heritage Custodian', undefined, 150, 1, false);
-      onLoginSuccess();
-    }, 350);
+    setError('Google sign-in is not configured yet. Please use your account credentials.');
+    triggerHaptic('heavy');
   };
 
   return (
@@ -474,7 +325,7 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess, onExploreAsGuest })
 
         {/* Form Card */}
         <div className="glass-heritage rounded-3xl border border-[#d4af37]/30 p-6 sm:p-8 shadow-2xl backdrop-blur-2xl">
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} autoComplete="off" className="space-y-4">
             {error && (
               <div className="p-3 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs flex items-start gap-2.5 animate-in shake">
                 <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
@@ -533,10 +384,12 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess, onExploreAsGuest })
                 </div>
                 <input
                   id="username"
-                  name="username"
+                  name="smarak-username"
                   type="text"
-                  autoComplete="username"
+                  autoComplete="off"
+                  readOnly={!usernameFocused}
                   value={username}
+                  onFocus={() => setUsernameFocused(true)}
                   onChange={(e) => {
                     setUsername(e.target.value);
                     if (error) setError(null);
@@ -602,10 +455,12 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess, onExploreAsGuest })
                 </div>
                 <input
                   id="password"
-                  name="password"
+                  name="smarak-password"
                   type={showPassword ? 'text' : 'password'}
-                  autoComplete={activeTab === 'signin' ? 'current-password' : 'new-password'}
+                  autoComplete="off"
+                  readOnly={!passwordFocused}
                   value={password}
+                  onFocus={() => setPasswordFocused(true)}
                   onChange={(e) => {
                     setPassword(e.target.value);
                     if (error) setError(null);

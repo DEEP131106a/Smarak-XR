@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import {
   Sparkles,
@@ -21,6 +21,7 @@ import { getUserProfile, subscribeState, logoutUser } from '../../services/herit
 import { soundEngine } from '../../services/soundEngine';
 import type { UserProfile } from '../../types/heritageAlive';
 import { triggerHaptic } from '../../utils/haptics';
+import { AmbientMusicToggle } from './AmbientMusicToggle';
 
 interface Props {
   activePage: string;
@@ -52,12 +53,33 @@ export const Navbar: React.FC<Props> = ({
   const [profile, setProfile] = useState<UserProfile>(getUserProfile());
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
+  const languageMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     return subscribeState(() => {
       setProfile(getUserProfile());
     });
   }, []);
+
+  useEffect(() => {
+    if (!langDropdownOpen) return;
+
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (languageMenuRef.current && !languageMenuRef.current.contains(event.target as Node)) {
+        setLangDropdownOpen(false);
+      }
+    };
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setLangDropdownOpen(false);
+    };
+
+    document.addEventListener('mousedown', handleOutsideClick);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [langDropdownOpen]);
 
   const handleNavClick = (page: string) => {
     triggerHaptic('tap');
@@ -67,7 +89,7 @@ export const Navbar: React.FC<Props> = ({
 
   return (
     <header className="fixed top-0 left-0 right-0 z-40 bg-[#0e1017]/90 backdrop-blur-2xl border-b border-[#d4af37]/20 shadow-2xl">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 flex items-center justify-between gap-2 min-w-0">
         {/* Brand Logo & Tagline (Section 4) */}
         <div
           onClick={() => handleNavClick('home')}
@@ -76,12 +98,12 @@ export const Navbar: React.FC<Props> = ({
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#c85a32] via-[#d4af37] to-[#e06d43] flex items-center justify-center text-black font-black text-xl shadow-lg shadow-[#d4af37]/25 group-hover:scale-105 transition-transform">
             🏛️
           </div>
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-2">
               <span className="font-cinzel font-black text-white text-lg tracking-wider">
                 SMARAK <span className="heritage-gold-text">AI</span>
               </span>
-              <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-gradient-to-r from-[#d4af37] to-[#c85a32] text-stone-950 uppercase tracking-widest font-sans">
+              <span className="hidden sm:inline text-[9px] font-black px-1.5 py-0.5 rounded bg-gradient-to-r from-[#d4af37] to-[#c85a32] text-stone-950 uppercase tracking-widest font-sans">
                 Cultural AI
               </span>
             </div>
@@ -155,7 +177,7 @@ export const Navbar: React.FC<Props> = ({
         </nav>
 
         {/* Right Actions: Search, Lang, Profile & Points */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-1.5 shrink-0">
           {/* Global Search Button */}
           <button
             onClick={() => {
@@ -167,9 +189,10 @@ export const Navbar: React.FC<Props> = ({
           >
             <Search className="w-4 h-4" />
           </button>
+          <AmbientMusicToggle />
 
           {/* Language Selector (Section 19) */}
-          <div className="relative">
+          <div ref={languageMenuRef} className="relative">
             <button
               onClick={() => {
                 triggerHaptic('tap');
@@ -300,12 +323,6 @@ export const Navbar: React.FC<Props> = ({
             🔍 Discover Culture
           </button>
           <button
-            onClick={() => handleNavClick('time-machine')}
-            className="w-full text-left py-2 px-3 rounded-xl hover:bg-white/5 hover:text-[#d4af37]"
-          >
-            ⏳ Culture Time Machine
-          </button>
-          <button
             onClick={() => handleNavClick('vanishing')}
             className="w-full text-left py-2 px-3 rounded-xl hover:bg-white/5 hover:text-[#d4af37]"
           >
@@ -377,6 +394,3 @@ export const Navbar: React.FC<Props> = ({
     </header>
   );
 };
-
-
-

@@ -83,6 +83,36 @@ npm install
 npm run dev
 ```
 
+### API authentication setup
+
+The API uses server-side user accounts and JWTs. Browser sessions use an
+`HttpOnly` cookie; native/API clients may still send a bearer token. Copy `server/.env.example` to
+`server/.env`, set a random `JWT_SECRET` with at least 32 characters, then run
+the server from the `server` directory. To create initial administrators, set
+`ADMIN_SEED_USERS` to a JSON array of accounts before running the Prisma seed
+command; passwords are hashed before storage and are never bundled into the
+frontend.
+
+Set `CORS_ORIGINS` to the exact frontend origin(s) used in deployment. The API
+also throttles registration and login attempts; adjust the rate-limit settings
+only when the deployment has an equivalent edge protection layer.
+
+```bash
+cd server
+npm install
+npx prisma migrate deploy
+npm run prisma:seed
+npm run dev
+```
+
+The backend exposes `GET /health/live` for process/liveness checks and
+`GET /health/ready` for load balancer readiness checks (including a database
+connectivity check). Configure deployments to route traffic only when the
+readiness endpoint returns `200`; it returns `503` while the database is
+unavailable. Requests are logged as structured JSON with a request ID, status,
+and duration. See `server/.env.example` for body-limit, shutdown, and
+production environment settings.
+
 ### Mobile Phone Testing
 Run with network host enabled:
 ```bash

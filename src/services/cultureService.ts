@@ -4,6 +4,7 @@ import type {
   CultureRegion,
   CultureFilter,
 } from '../types/culture';
+import { apiService } from './apiService';
 
 // Reusable Categories definition for frontend layout & navigation
 export const CULTURE_CATEGORIES: CultureCategoryMeta[] = [
@@ -93,9 +94,6 @@ export const DEFAULT_CULTURE_REGIONS: CultureRegion[] = [
   { id: 'maharashtra', name: 'Maharashtra', hindiName: 'महाराष्ट्र', description: 'Lavani folk rhythms, Paithani sarees, and Ganesh Utsav fervor.' },
 ];
 
-// In-memory / dynamic store for culture items received from backend API
-let cultureItemsStore: CultureItem[] = [];
-
 /**
  * Service function to retrieve all culture categories metadata
  */
@@ -107,73 +105,22 @@ export function getCultureCategories(): CultureCategoryMeta[] {
  * Service function to query culture items from backend / dynamic store
  */
 export async function getCultureItems(filter?: CultureFilter): Promise<CultureItem[]> {
-  // Simulating network fetch delay for realistic API architecture handling
-  await new Promise((resolve) => setTimeout(resolve, 150));
-
-  let results = [...cultureItemsStore];
-
-  if (!filter) return results;
-
-  if (filter.category && filter.category !== 'all') {
-    results = results.filter((item) => item.category === filter.category);
-  }
-
-  if (filter.region && filter.region !== 'all') {
-    results = results.filter(
-      (item) => item.region.toLowerCase() === filter.region?.toLowerCase()
-    );
-  }
-
-  if (filter.arEnabled) {
-    results = results.filter((item) => item.arEnabled === true);
-  }
-
-  if (filter.featured) {
-    results = results.filter((item) => item.featured === true);
-  }
-
-  if (filter.mediaType && filter.mediaType !== 'all') {
-    results = results.filter((item) => {
-      switch (filter.mediaType) {
-        case 'video':
-          return item.videos && item.videos.length > 0;
-        case 'audio':
-          return item.audio && item.audio.length > 0;
-        case 'image':
-          return item.images && item.images.length > 0;
-        case 'model3d':
-          return !!item.model3d;
-        case 'ar':
-          return !!item.arEnabled;
-        default:
-          return true;
-      }
-    });
-  }
-
-  if (filter.searchQuery && filter.searchQuery.trim() !== '') {
-    const q = filter.searchQuery.toLowerCase().trim();
-    results = results.filter(
-      (item) =>
-        item.title.toLowerCase().includes(q) ||
-        item.description.toLowerCase().includes(q) ||
-        item.region.toLowerCase().includes(q) ||
-        (item.tags && item.tags.some((t) => t.toLowerCase().includes(q)))
-    );
-  }
-
-  return results;
+  const params: Record<string, string> = {};
+  if (filter?.category && filter.category !== 'all') params.category = filter.category;
+  if (filter?.region && filter.region !== 'all') params.region = filter.region;
+  if (filter?.searchQuery) params.search = filter.searchQuery;
+  if (filter?.arEnabled) params.arEnabled = 'true';
+  if (filter?.featured) params.featured = 'true';
+  if (filter?.mediaType && filter.mediaType !== 'all') params.mediaType = filter.mediaType;
+  return apiService.getCultureItems(params) as Promise<CultureItem[]>;
 }
 
 /**
  * Service function to fetch a single culture item by category & id
  */
 export async function getCultureItem(category: string, id: string): Promise<CultureItem | null> {
-  await new Promise((resolve) => setTimeout(resolve, 100));
-  const found = cultureItemsStore.find(
-    (item) => item.id === id && item.category === category
-  );
-  return found || null;
+  const item = await apiService.getCultureItem(id) as CultureItem;
+  return item.category === category ? item : null;
 }
 
 /**
@@ -187,8 +134,7 @@ export async function getFeaturedCulture(): Promise<CultureItem[]> {
  * Service function to fetch backend-driven regional list
  */
 export async function getCultureRegions(): Promise<CultureRegion[]> {
-  await new Promise((resolve) => setTimeout(resolve, 100));
-  return DEFAULT_CULTURE_REGIONS;
+  return apiService.getCultureRegions();
 }
 
 /**
@@ -202,5 +148,5 @@ export async function searchCulture(query: string): Promise<CultureItem[]> {
  * Helper to allow backend or local admin simulator to register items
  */
 export function registerBackendCultureItems(items: CultureItem[]): void {
-  cultureItemsStore = [...items];
+  void items;
 }

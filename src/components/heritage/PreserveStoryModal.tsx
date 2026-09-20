@@ -2,15 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mic, Video, Camera, FileText, Utensils, X, Sparkles, CheckCircle2, Award } from 'lucide-react';
 import type { StoryItem, CategoryType } from '../../types/heritageAlive';
-import { addUserStory, getUserProfile, subscribeState } from '../../services/heritageStateService';
+import { submitUserStory } from '../../services/heritageStateService';
 
 export const PreserveStoryModal: React.FC = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [profile, setProfile] = useState(getUserProfile());
-
-  useEffect(() => {
-    return subscribeState(() => setProfile(getUserProfile()));
-  }, []);
   const [mediaType, setMediaType] = useState<'audio' | 'video' | 'photo' | 'written' | 'recipe'>('written');
   
   // Form fields
@@ -23,6 +18,8 @@ export const PreserveStoryModal: React.FC = () => {
   const [recipeIngredientsText, setRecipeIngredientsText] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   // Result Card state
   const [createdStoryCard, setCreatedStoryCard] = useState<StoryItem | null>(null);
@@ -52,19 +49,24 @@ export const PreserveStoryModal: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !storyText) return;
+    if (!title.trim() || !storyText.trim() || isSubmitting) {
+      setSubmitError('Please enter a title and story before preserving it.');
+      return;
+    }
+
+    setSubmitError(null);
+    setIsSubmitting(true);
 
     const newStory: StoryItem = {
       id: `user-story-${Date.now()}`,
-      title,
+      title: title.trim(),
       category,
       region: region || 'Local Region',
       state: stateName,
-      preservedBy: preservedBy || profile?.name || 'Anonymous Contributor',
-        authorId: profile?.name || 'guest',
+      preservedBy: preservedBy || 'Anonymous Contributor',
       date: 'Just Now',
-      shortStory: storyText.slice(0, 150) + (storyText.length > 150 ? '...' : ''),
-      fullStory: storyText,
+      shortStory: storyText.trim().slice(0, 150) + (storyText.trim().length > 150 ? '...' : ''),
+      fullStory: storyText.trim(),
       mediaType,
       status: 'pending',
       image:
@@ -75,8 +77,18 @@ export const PreserveStoryModal: React.FC = () => {
         mediaType === 'recipe' ? recipeIngredientsText.split('\n').filter((line) => line.trim().length > 0) : undefined,
     };
 
-    addUserStory(newStory);
-    setCreatedStoryCard(newStory);
+    void submitUserStory(newStory)
+      .then(setCreatedStoryCard)
+      .catch((error: Error) => {
+        console.error(error);
+        setSubmitError(
+          error.message.toLowerCase().includes('authentication') ||
+          error.message.includes('401')
+            ? 'Please sign in before preserving a story.'
+            : error.message || 'The story could not be preserved. Please try again.',
+        );
+      })
+      .finally(() => setIsSubmitting(false));
   };
 
   const resetForm = () => {
@@ -85,6 +97,8 @@ export const PreserveStoryModal: React.FC = () => {
     setRegion('');
     setRecipeIngredientsText('');
     setCreatedStoryCard(null);
+    setSubmitError(null);
+    setIsSubmitting(false);
   };
 
   if (!isOpen) return null;
@@ -218,6 +232,23 @@ export const PreserveStoryModal: React.FC = () => {
 
               {/* Story Form */}
               <form onSubmit={handleSubmit} className="space-y-4">
+                {submitError && (
+                  <div className="rounded-xl border border-rose-500/40 bg-rose-500/10 p-3 text-sm text-rose-200" role="alert">
+                    <p>{submitError}</p>
+                    {submitError.toLowerCase().includes('sign in') && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsOpen(false);
+                          window.dispatchEvent(new CustomEvent('navigate-to-page', { detail: 'login' }));
+                        }}
+                        className="mt-2 font-bold text-amber-300 underline underline-offset-2"
+                      >
+                        Go to sign in
+                      </button>
+                    )}
+                  </div>
+                )}
                 <div>
                   <label className="block text-xs font-bold text-stone-300 uppercase tracking-wider mb-1">
                     Title of Tradition / Story *
@@ -248,6 +279,7 @@ export const PreserveStoryModal: React.FC = () => {
                       <option value="Language">Language / Oral History</option>
                       <option value="Tradition">Family Tradition</option>
                       <option value="Dance">Folk Dance</option>
+                      <option value="Other">Other</option>
                     </select>
                   </div>
 
@@ -323,9 +355,10 @@ export const PreserveStoryModal: React.FC = () => {
 
                   <button
                     type="submit"
+                    disabled={isSubmitting}
                     className="px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-sm transition-all duration-300 shadow-lg shadow-amber-500/20"
                   >
-                    Digitally Preserve Story →
+                    {isSubmitting ? 'Preserving...' : 'Digitally Preserve Story →'}
                   </button>
                 </div>
               </form>
@@ -385,9 +418,3 @@ export const PreserveStoryModal: React.FC = () => {
     </AnimatePresence>
   );
 };
-
-
-
-
-
-

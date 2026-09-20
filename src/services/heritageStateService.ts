@@ -1,25 +1,28 @@
 import type { UserProfile, StoryItem } from '../types/heritageAlive';
-import { PRESERVED_STORIES } from '../data/heritageAliveData';
+import { clearAuthToken } from './apiService';
+import { apiService } from './apiService';
 
 const INITIAL_PROFILE: UserProfile = {
-  name: 'Guest',
+  name: 'Sourav Preet',
   avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-  title: 'Novice Explorer',
-  points: 0,
-  level: 1,
-  levelName: 'Novice Explorer',
-  traditionsDiscovered: 0,
-  storiesPreserved: 0,
-  heritageAdopted: 0,
-  challengesCompleted: 0,
-  adoptedIds: [],
-  badges: [],
-  isLoggedIn: false,
-  isAdmin: false
+  title: 'Culture Guardian',
+  points: 420,
+  level: 4,
+  levelName: 'Culture Guardian',
+  traditionsDiscovered: 48,
+  storiesPreserved: 12,
+  heritageAdopted: 3,
+  challengesCompleted: 7,
+  adoptedIds: ['adopt-folk-song'],
+  badges: [
+    { id: 'b1', name: 'Heritage Explorer', icon: '🏛️', description: 'Discovered 25+ cultural traditions', unlocked: true },
+    { id: 'b2', name: 'Story Keeper', icon: '🎤', description: 'Preserved 10+ community stories', unlocked: true },
+    { id: 'b3', name: 'Culture Guardian', icon: '🧑‍🎨', description: 'Adopted 3+ vanishing heritages', unlocked: true },
+    { id: 'b4', name: 'Cultural Ambassador', icon: '🌍', description: 'Shared traditions across 5 regions', unlocked: false },
+  ],
 };
 
-const STORAGE_USERS_DB_KEY = 'smarak_users_db';
-const STORAGE_STORIES_KEY = 'heritage_alive_user_stories';
+const STORAGE_PROFILE_KEY = 'heritage_alive_profile';
 const STORAGE_AUTH_KEY = 'smarak_user';
 
 type Listener = () => void;
@@ -34,31 +37,12 @@ function notify(): void {
   listeners.forEach((fn) => fn());
 }
 
-// --- DATABASE FUNCTIONS ---
-function getUsersDB(): Record<string, UserProfile> {
-  try {
-    const raw = localStorage.getItem(STORAGE_USERS_DB_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch {
-    // ignore
-  }
-  return {};
-}
-
-function saveUsersDB(db: Record<string, UserProfile>) {
-  try {
-    localStorage.setItem(STORAGE_USERS_DB_KEY, JSON.stringify(db));
-  } catch {
-    // ignore
-  }
-}
-
 export function isUserLoggedIn(): boolean {
   try {
     const raw = localStorage.getItem(STORAGE_AUTH_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      return !!parsed.isLoggedIn;
+      if (parsed && parsed.isLoggedIn) return true;
     }
   } catch {
     // fallback
@@ -66,34 +50,22 @@ export function isUserLoggedIn(): boolean {
   return false;
 }
 
-function getActiveUsername(): string | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_AUTH_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (parsed.isLoggedIn && parsed.name) return parsed.name;
-    }
-  } catch {}
-  return null;
-}
-
 export function getUserProfile(): UserProfile {
-  const activeUser = getActiveUsername();
-  if (!activeUser) return INITIAL_PROFILE;
-
-  const db = getUsersDB();
-  if (db[activeUser]) {
-    // Make sure transient state isLoggedIn is correct
-    return { ...db[activeUser], isLoggedIn: true };
+  try {
+    const saved = localStorage.getItem(STORAGE_PROFILE_KEY);
+    if (saved) return JSON.parse(saved);
+  } catch {
+    // fallback
   }
-  
   return INITIAL_PROFILE;
 }
 
 export function saveUserProfile(profile: UserProfile): void {
-  const db = getUsersDB();
-  db[profile.name] = profile;
-  saveUsersDB(db);
+  try {
+    localStorage.setItem(STORAGE_PROFILE_KEY, JSON.stringify(profile));
+  } catch {
+    // ignore
+  }
   notify();
 }
 
@@ -106,18 +78,16 @@ export function loginUser(
   level?: number,
   isAdmin?: boolean
 ): UserProfile {
-  const db = getUsersDB();
-  const existingProfile = db[name];
-
+  const current = getUserProfile();
   const updated: UserProfile = {
-    ...(existingProfile || INITIAL_PROFILE),
-    name: name.trim(),
-    email: email || existingProfile?.email || '',
-    title: roleTitle || existingProfile?.title || 'Culture Guardian',
-    levelName: roleTitle || existingProfile?.levelName || 'Culture Guardian',
-    avatar: avatarUrl || existingProfile?.avatar || INITIAL_PROFILE.avatar,
-    points: points !== undefined ? points : (existingProfile?.points || 0),
-    level: level !== undefined ? level : (existingProfile?.level || 1),
+    ...current,
+    name: name.trim() || 'Vansh',
+    email: email || '',
+    title: roleTitle || current.title,
+    levelName: roleTitle || current.levelName,
+    avatar: avatarUrl || current.avatar,
+    points: points !== undefined ? points : current.points,
+    level: level !== undefined ? level : current.level,
     isLoggedIn: true,
     isAdmin: isAdmin ?? false,
   };
@@ -139,21 +109,23 @@ export function loginUser(
 }
 
 export function logoutUser(): void {
+  clearAuthToken();
   try {
     localStorage.removeItem(STORAGE_AUTH_KEY);
-    notify();
+    const current = getUserProfile();
+    const loggedOut: UserProfile = {
+      ...current,
+      isLoggedIn: false,
+      isAdmin: false,
+    };
+    saveUserProfile(loggedOut);
   } catch {
     // ignore
   }
 }
 
-export function addPoints(pts: number, reason?: string, targetUsername?: string): UserProfile | null {
-  const db = getUsersDB();
-  const usernameToUpdate = targetUsername || getActiveUsername();
-  
-  if (!usernameToUpdate || !db[usernameToUpdate]) return null;
-
-  const profile = db[usernameToUpdate];
+export function addPoints(pts: number, reason?: string): UserProfile {
+  const profile = getUserProfile();
   const newPoints = profile.points + pts;
   const newLevel = Math.floor(newPoints / 100) + 1;
   const levelNames = ['Novice Explorer', 'Culture Advocate', 'Heritage Custodian', 'Culture Guardian', 'Master Storyteller', 'Legendary Ambassador'];
@@ -166,19 +138,12 @@ export function addPoints(pts: number, reason?: string, targetUsername?: string)
     levelName: levelName,
   };
 
-  db[usernameToUpdate] = updated;
-  saveUsersDB(db);
-  
-  if (usernameToUpdate === getActiveUsername()) {
-    notify();
-  }
+  saveUserProfile(updated);
   return updated;
 }
 
 export function toggleAdoptHeritage(itemId: string): boolean {
   const profile = getUserProfile();
-  if (!profile.isLoggedIn) return false;
-
   const isAdopted = profile.adoptedIds.includes(itemId);
   let updatedAdopted = [...profile.adoptedIds];
 
@@ -196,77 +161,33 @@ export function toggleAdoptHeritage(itemId: string): boolean {
   };
 
   saveUserProfile(updated);
+  void (isAdopted ? apiService.deleteAdoption(itemId) : apiService.adopt(itemId)).catch(console.error);
   return !isAdopted;
 }
 
-export function getUserStories(): StoryItem[] {
-  let userStories: StoryItem[] = [];
-  try {
-    const saved = localStorage.getItem(STORAGE_STORIES_KEY);
-    if (saved) userStories = JSON.parse(saved);
-  } catch {
-    userStories = [];
-  }
-  return [...userStories, ...PRESERVED_STORIES];
+export async function fetchUserStories(): Promise<StoryItem[]> {
+  const response = await apiService.getMyStories() as { stories?: StoryItem[] };
+  return response.stories || [];
 }
 
-export function addUserStory(story: StoryItem): void {
-  let existing: StoryItem[] = [];
-  try {
-    const saved = localStorage.getItem(STORAGE_STORIES_KEY);
-    if (saved) existing = JSON.parse(saved);
-  } catch {
-    existing = [];
-  }
-  const updatedList = [story, ...existing];
-  try {
-    localStorage.setItem(STORAGE_STORIES_KEY, JSON.stringify(updatedList));
-  } catch {
-    // ignore
-  }
-
-  const profile = getUserProfile();
-  if (profile.isLoggedIn) {
-    const updatedProfile: UserProfile = {
-      ...profile,
-      storiesPreserved: profile.storiesPreserved + 1,
-    };
-    saveUserProfile(updatedProfile);
-    // Note: We don't add points immediately anymore! Points are added when verified.
-  }
+export async function fetchPublicStories(): Promise<StoryItem[]> {
+  return apiService.getPublicStories() as Promise<StoryItem[]>;
 }
 
-export function updateUserStoryStatus(storyId: string, status: 'verified' | 'rejected'): void {
-  let existing: StoryItem[] = [];
-  try {
-    const saved = localStorage.getItem(STORAGE_STORIES_KEY);
-    if (saved) existing = JSON.parse(saved);
-  } catch {
-    return;
-  }
-  
-  let authorIdToReward: string | undefined;
-
-  const updatedList = existing.map(story => {
-    if (story.id === storyId) {
-      if (status === 'verified' && story.status === 'pending') {
-        authorIdToReward = story.authorId || story.preservedBy;
-      }
-      return { ...story, status };
-    }
-    return story;
-  });
-  
-  try {
-    localStorage.setItem(STORAGE_STORIES_KEY, JSON.stringify(updatedList));
-  } catch {
-    // ignore
-  }
-
-  // Inject points to the author if verified
-  if (authorIdToReward && status === 'verified') {
-    addPoints(50, 'Story Verified by Admin', authorIdToReward);
-  }
-
-  notify();
+export async function submitUserStory(story: StoryItem): Promise<StoryItem> {
+  const response = await apiService.createStory({
+    title: story.title,
+    category: story.category,
+    region: story.region,
+    state: story.state,
+    preservedBy: story.preservedBy,
+    shortStory: story.shortStory,
+    fullStory: story.fullStory,
+    mediaType: story.mediaType,
+    image: story.image,
+    audioUrl: story.audioUrl,
+    videoUrl: story.videoUrl,
+    recipeIngredients: story.recipeIngredients,
+  }) as { story?: StoryItem };
+  return response.story || story;
 }
