@@ -9,12 +9,19 @@ export const AdminDashboard: React.FC = () => {
   const [stories, setStories] = useState<StoryItem[]>([]);
 
   useEffect(() => {
-    // Initial fetch
-    void apiService.getModerationStories().then((data: { stories: StoryItem[] }) => {
-      setStories(data.stories);
-    }).catch(console.error);
+    const fetchStories = () => {
+      void apiService.getModerationStories().then((data: { stories: StoryItem[] }) => {
+        setStories(data.stories);
+      }).catch(console.error);
+    };
 
-    // Setup an interval or manual refresh if needed, but since we modify local state we'll just update state directly
+    // Initial fetch
+    fetchStories();
+
+    // LIVE AUTO-REFRESH: Poll every 3 seconds
+    const intervalId = setInterval(fetchStories, 3000);
+
+    return () => clearInterval(intervalId);
   }, []);
 
   const handleAction = (storyId: string, action: 'verified' | 'rejected') => {
@@ -91,3 +98,4 @@ export const AdminDashboard: React.FC = () => {
     </div>
   );
 };
+
