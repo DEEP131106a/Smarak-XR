@@ -1,12 +1,20 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Navigation, Sparkles, ChevronRight, Compass } from 'lucide-react';
+import { Navigation, Sparkles, ChevronRight, Compass, Search, X } from 'lucide-react';
 import { MAP_LOCATIONS } from '../../data/heritageAliveData';
-import { INDIA_MAP_DATA } from '../../data/indiaMapSvgData';
 import { getCityById } from '../../data/cityData';
 import type { MapPinLocation } from '../../types/heritageAlive';
 import { triggerHaptic } from '../../utils/haptics';
 import { useLanguage } from '../../i18n/LanguageContext';
+
+const CITY_COORDINATES: Record<string, [number, number]> = {
+  amritsar: [31.634, 74.8723],
+  jaipur: [26.9124, 75.7873],
+  dharamshala: [32.219, 76.3234],
+  chandigarh: [30.7333, 76.7794],
+  mumbai: [19.076, 72.8777],
+  kolkata: [22.5726, 88.3639],
+};
 
 interface Props {
   onCitySelect?: (cityId: string) => void;
@@ -14,8 +22,24 @@ interface Props {
 
 export const HeritageMap: React.FC<Props> = ({ onCitySelect }) => {
   const [selectedPin, setSelectedPin] = useState<MapPinLocation | null>(MAP_LOCATIONS[0]);
+  const [mapSearch, setMapSearch] = useState('');
   const activeCityData = selectedPin ? getCityById(selectedPin.id) : null;
   const { t, language } = useLanguage();
+  const matchingPins = useMemo(() => {
+    const query = mapSearch.trim().toLowerCase();
+    if (!query) return MAP_LOCATIONS;
+    return MAP_LOCATIONS.filter((pin) =>
+      `${pin.name} ${pin.state} ${pin.category} ${pin.nearbyTraditions.join(' ')}`
+        .toLowerCase()
+        .includes(query),
+    );
+  }, [mapSearch]);
+
+  const selectPin = (pin: MapPinLocation) => {
+    triggerHaptic('tap');
+    setSelectedPin(pin);
+    setMapSearch('');
+  };
 
   return (
     <div className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto min-h-screen">
@@ -29,7 +53,7 @@ export const HeritageMap: React.FC<Props> = ({ onCitySelect }) => {
           {t('map.title1')} <span className="heritage-gold-text">{t('map.title2')}</span>
         </h1>
         <p className="text-lg text-stone-400">
-          ΓÇ£{t('map.subtitle')}ΓÇ¥
+          â€œ{t('map.subtitle')}â€
         </p>
       </div>
 
@@ -46,137 +70,69 @@ export const HeritageMap: React.FC<Props> = ({ onCitySelect }) => {
             </span>
           </div>
 
-          {/* Authentic India SVG Map */}
-          <div className="relative w-full h-[480px] sm:h-[520px] flex items-center justify-center my-2 select-none">
-            <svg
-              viewBox={INDIA_MAP_DATA.viewBox}
-              className="w-full h-full max-h-[500px] drop-shadow-2xl"
-            >
-              <defs>
-                <linearGradient id="activeStateGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#d4af37" stopOpacity="0.3" />
-                  <stop offset="100%" stopColor="#c85a32" stopOpacity="0.15" />
-                </linearGradient>
-              </defs>
-
-              {/* All 36 Indian States and Union Territories */}
-              <g id="india-states">
-                {INDIA_MAP_DATA.locations.map((loc) => {
-                  const isCityState = MAP_LOCATIONS.some((p) => p.stateId === loc.id);
-                  const isSelected = selectedPin?.stateId === loc.id;
-                  return (
-                    <path
-                      key={loc.id}
-                      id={`state-${loc.id}`}
-                      d={loc.path}
-                      onClick={() => {
-                        const matchingPin = MAP_LOCATIONS.find((p) => p.stateId === loc.id);
-                        if (matchingPin) {
-                          triggerHaptic('tap');
-                          setSelectedPin(matchingPin);
-                        }
-                      }}
-                      className={`transition-all duration-300 ${
-                        isCityState ? 'cursor-pointer' : 'cursor-default'
-                      }`}
-                      style={{
-                        fill: isSelected
-                          ? 'url(#activeStateGrad)'
-                          : isCityState
-                          ? '#1e1a16'
-                          : '#121110',
-                        stroke: isSelected
-                          ? '#f59e0b'
-                          : isCityState
-                          ? 'rgba(212, 175, 55, 0.6)'
-                          : 'rgba(120, 113, 108, 0.25)',
-                        strokeWidth: isSelected ? 1.6 : isCityState ? 1.0 : 0.5,
-                      }}
-                    >
-                      <title>{loc.name}</title>
-                    </path>
-                  );
-                })}
-              </g>
-
-              {/* City Markers for the 6 Cities */}
-              {MAP_LOCATIONS.map((pin) => {
-                const isSelected = selectedPin?.id === pin.id;
-                const coords = pin.svgCoords || {
-                  x: (pin.coords.x / 100) * 612,
-                  y: (pin.coords.y / 100) * 696,
-                };
-                return (
-                  <g
+          <div className="relative z-20 mb-3">
+            <Search className="absolute left-3 top-3 w-4 h-4 text-stone-500" aria-hidden="true" />
+            <input
+              type="search"
+              value={mapSearch}
+              onChange={(event) => setMapSearch(event.target.value)}
+              placeholder="Search a city or state, e.g. Jaipur or Punjab"
+              aria-label="Search cities or states on the heritage map"
+              className="w-full rounded-xl border border-stone-700 bg-stone-950/90 py-2.5 pl-9 pr-10 text-sm text-white outline-none focus:border-amber-400"
+            />
+            {mapSearch && (
+              <button
+                type="button"
+                aria-label="Clear map search"
+                onClick={() => setMapSearch('')}
+                className="absolute right-2 top-2 rounded-lg p-1 text-stone-400 hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+            {mapSearch && (
+              <div className="absolute left-0 right-0 top-full mt-1 overflow-hidden rounded-xl border border-amber-500/30 bg-stone-950 shadow-2xl">
+                {matchingPins.length > 0 ? matchingPins.map((pin) => (
+                  <button
                     key={pin.id}
-                    transform={`translate(${coords.x}, ${coords.y})`}
-                    onClick={() => {
-                      triggerHaptic('tap');
-                      setSelectedPin(pin);
-                    }}
-                    className="cursor-pointer group"
+                    type="button"
+                    onClick={() => selectPin(pin)}
+                    className="flex w-full items-center justify-between px-3 py-2.5 text-left text-sm text-stone-200 hover:bg-amber-500/15"
                   >
-                    {/* Pulsing ring on active city */}
-                    {isSelected && (
-                      <circle
-                        r="18"
-                        className="fill-amber-400/30 animate-ping"
-                      />
-                    )}
-
-                    <circle
-                      r={isSelected ? '10' : '6.5'}
-                      className={`transition-all duration-300 ${
-                        isSelected
-                          ? 'fill-amber-400 stroke-stone-950 stroke-2'
-                          : 'fill-stone-950 stroke-amber-400/90 stroke-2 group-hover:fill-amber-500'
-                      }`}
-                    />
-                    <circle
-                      r={isSelected ? '4' : '2.5'}
-                      className={isSelected ? 'fill-stone-950' : 'fill-amber-300'}
-                    />
-
-                    {/* City Name Label Pill */}
-                    <g
-                      transform="translate(0, -15)"
-                      className={`transition-all duration-200 pointer-events-none ${
-                        isSelected
-                          ? 'opacity-100 scale-110'
-                          : 'opacity-85 group-hover:opacity-100 group-hover:scale-105'
-                      }`}
-                    >
-                      <rect
-                        x="-38"
-                        y="-12"
-                        width="76"
-                        height="16"
-                        rx="8"
-                        className={
-                          isSelected
-                            ? 'fill-amber-500 stroke-stone-950 stroke-1 shadow-lg'
-                            : 'fill-stone-950/95 stroke-amber-500/40 stroke-1'
-                        }
-                      />
-                      <text
-                        x="0"
-                        y="-1"
-                        textAnchor="middle"
-                        fontSize="8.5"
-                        fontWeight="bold"
-                        className={isSelected ? 'fill-stone-950 font-cinzel font-black' : 'fill-amber-200 font-cinzel'}
-                      >
-                        {language === 'hi' && pin.hindiName ? pin.hindiName : pin.name}
-                      </text>
-                    </g>
-                  </g>
-                );
-              })}
-            </svg>
+                    <span className="font-semibold">{pin.name}</span>
+                    <span className="text-xs text-amber-300">{pin.state}</span>
+                  </button>
+                )) : (
+                  <p className="px-3 py-3 text-sm text-stone-400">No matching city or state found.</p>
+                )}
+              </div>
+            )}
           </div>
 
-          <div className="text-center text-xs text-stone-500 italic z-10 pt-2 border-t border-stone-800/40">
-            Click any city pin or highlighted state to inspect regional traditions.
+          <div className="my-2 rounded-2xl overflow-hidden border border-amber-500/30 bg-stone-950">
+            {(() => {
+              const [lat, lon] = CITY_COORDINATES[selectedPin?.id || ''] || [22.5937, 78.9629];
+              return (
+                <>
+                  <iframe
+                    key={selectedPin?.id}
+                    title="OpenStreetMap heritage locations"
+                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${lon - 1.5}%2C${lat - 1.5}%2C${lon + 1.5}%2C${lat + 1.5}&layer=mapnik&marker=${lat}%2C${lon}`}
+                    className="block w-full h-[360px] sm:h-[520px] border-0"
+                    loading="eager"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                  />
+                  <a
+                    href={`https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=6/${lat}/${lon}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block border-t border-amber-500/20 px-3 py-2 text-center text-xs text-amber-300 hover:text-amber-200"
+                  >
+                    Open the interactive map
+                  </a>
+                </>
+              );
+            })()}
           </div>
         </div>
 
@@ -232,13 +188,36 @@ export const HeritageMap: React.FC<Props> = ({ onCitySelect }) => {
                         <span className="flex items-center gap-2">
                           <Sparkles className="w-3.5 h-3.5 text-amber-400" /> {trad}
                         </span>
-                        <span className="text-[10px] text-emerald-400 font-bold">Documented Γ£ô</span>
+                        <span className="text-[10px] text-emerald-400 font-bold">Documented âœ“</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 <div className="pt-4 border-t border-stone-800 space-y-3">
+                  {(() => {
+                    const coords = CITY_COORDINATES[selectedPin.id] || [20.5937, 78.9629];
+                    const [lat, lon] = coords;
+                    return (
+                      <div className="rounded-2xl overflow-hidden border border-amber-500/20 bg-stone-950">
+                        <iframe
+                          title={`${selectedPin.name} exact OpenStreetMap location`}
+                          src={`https://www.openstreetmap.org/export/embed.html?bbox=${lon - 0.08}%2C${lat - 0.06}%2C${lon + 0.08}%2C${lat + 0.06}&layer=mapnik&marker=${lat}%2C${lon}`}
+                          className="block w-full h-48 border-0"
+                          loading="eager"
+                          referrerPolicy="strict-origin-when-cross-origin"
+                        />
+                        <a
+                          href={`https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=12/${lat}/${lon}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="block px-3 py-2 text-xs text-amber-300 hover:text-amber-200"
+                        >
+                          Open exact location in OpenStreetMap
+                        </a>
+                      </div>
+                    );
+                  })()}
                   {onCitySelect && (
                     <button
                       onClick={() => onCitySelect(selectedPin.id)}
